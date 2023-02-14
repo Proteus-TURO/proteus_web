@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using ProteusWeb.Database;
 
 namespace ProteusWeb.Controller;
 
@@ -6,5 +7,10 @@ namespace ProteusWeb.Controller;
 public class Test : ControllerBase
 {
     [HttpGet]
-    public string Get() => "This is a basic ASP.NET Controller";
+    public string Get()
+    {
+        var db = HttpContext.RequestServices.GetService(typeof(DatabaseController)) as DatabaseController;
+        db.GetDatabases();
+        return "This is a basic ASP.NET Controller";
+    }
 }

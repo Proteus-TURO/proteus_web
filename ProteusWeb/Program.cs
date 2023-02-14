@@ -11,6 +11,14 @@ public static class Program
 
     private static IWebHost BuildWebHost()
     {
-        return WebHost.CreateDefaultBuilder().UseStartup<Startup>().Build();
+        var config = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json")
+            .Build();
+        
+        return WebHost.CreateDefaultBuilder()
+            .UseStartup<Startup>()
+            .UseConfiguration(config)
+            .Build();
     }
 }
