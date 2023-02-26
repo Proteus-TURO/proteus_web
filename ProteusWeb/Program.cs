@@ -15,7 +15,6 @@ public static class Program
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json")
             .Build();
-        
         return WebHost.CreateDefaultBuilder()
             .UseStartup<Startup>()
             .UseConfiguration(config)
