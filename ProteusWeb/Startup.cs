@@ -1,10 +1,14 @@
 using System.Text;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using ProteusWeb.Database;
+using Serilog;
 
 namespace ProteusWeb;
 
@@ -81,20 +85,43 @@ public class Startup
             {
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(signingKey)),
+                ValidateLifetime = true,
                 ValidateIssuer = false,
                 ValidateAudience = false
             };
+        });
+
+        services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        }).AddCookie(options =>
+        {
+            options.Cookie.Name = "Proteus.Cookie";
+            options.LoginPath = "/Login";
+            options.LogoutPath = "/Logout";
+            options.ExpireTimeSpan = TimeSpan.FromHours(24);
+        });;
+
+        services.AddAuthorization(options =>
+        {
+            options.DefaultPolicy = new AuthorizationPolicyBuilder()
+                .RequireAuthenticatedUser()
+                .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme,
+                    CookieAuthenticationDefaults.AuthenticationScheme)
+                .Build();
         });
     }
 
     public void Configure(IApplicationBuilder app, IHostEnvironment env)
     {
+        app.UseHttpsRedirection();
         app.UseRouting();
         app.UseSwagger();
         app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "Proteus API"); });
         app.UseAuthentication();
         app.UseAuthorization();
-        
+
         app.Use(async (context, next) =>
         {
             if (context.Request.Path.StartsWithSegments("/private"))
@@ -105,6 +132,7 @@ public class Startup
                     return;
                 }
             }
+
             await next();
         });
         app.UseFileServer(new FileServerOptions
@@ -112,7 +140,16 @@ public class Startup
             FileProvider = new PhysicalFileProvider(
                 Path.Combine(Directory.GetCurrentDirectory(), "StaticFiles")),
             RequestPath = "",
-            EnableDefaultFiles = true
+            EnableDefaultFiles = true,
+            StaticFileOptions =
+            {
+                OnPrepareResponse = ctx =>
+                {
+                    ctx.Context.Response.Headers["Cache-Control"] = "no-cache, no-store";
+                    ctx.Context.Response.Headers["Pragma"] = "no-cache";
+                    ctx.Context.Response.Headers["Expires"] = "-1";
+                }
+            }
         });
         app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
     }

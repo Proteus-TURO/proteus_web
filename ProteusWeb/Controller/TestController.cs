@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using LinqToDB;
 using LinqToDB.DataProvider.MySql;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MySqlConnector;

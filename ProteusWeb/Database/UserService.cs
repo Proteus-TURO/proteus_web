@@ -35,7 +35,7 @@ public class UserService
         var username = "";
         foreach (var claim in claims)
         {
-            if (claim.Type == "username")
+            if (claim.Type == ClaimTypes.Name)
             {
                 username = claim.Value;
             }
