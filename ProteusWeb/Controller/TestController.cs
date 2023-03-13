@@ -25,6 +25,7 @@ public class TestController : ControllerBase
     [HttpGet]
     public string Get()
     {
+        _userService.RemoveAllRolesFromUser(null, "admin");
         return "This is a basic ASP.NET Controller";
     }
     
