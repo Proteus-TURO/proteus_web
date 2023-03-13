@@ -1,7 +1,7 @@
 const loginButton = document.getElementById("login-btn")
 
 function login(username, password) {
-    const LOGIN_API = "https://localhost:443/api/login";
+    const LOGIN_API = "https://localhost:12346/api/login";
     return new Promise((resolve, reject) => {
         fetch(LOGIN_API, {
             method: "POST",

@@ -1,7 +1,7 @@
 const loginButton = document.getElementById("logout-btn")
 
 function logout() {
-    const LOGIN_API = "https://localhost:443/api/logout";
+    const LOGIN_API = "https://localhost:12346/api/logout";
     return new Promise((resolve, reject) => {
         fetch(LOGIN_API, {
             method: "POST"
@@ -26,3 +26,5 @@ loginButton.addEventListener("click", async () => {
         console.error(e);
     }
 })
+
+document.getElementById('markdown').innerHTML = marked.parse('# Marked in the browser\n\nRendered by **marked**.');

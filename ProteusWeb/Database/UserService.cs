@@ -1,7 +1,6 @@
 using System.Security.Claims;
 using LinqToDB;
 using ProteusWeb.Database.Tables;
-using ProteusWeb.Helper;
 
 namespace ProteusWeb.Database;
 
@@ -44,15 +43,10 @@ public class UserService
         return username == "" ? null : GetUser(username);
     }
 
-    public bool ValidPassword(string username, string password)
+    public bool ValidPassword(string username, string passwordHash)
     {
         var user = GetUser(username);
-        if (user == null)
-        {
-            return false;
-        }
-        var hashedPassword = PasswordHelper.CreateHash(password);
-        return user.PasswordHash.Equals(hashedPassword);
+        return user != null && user.PasswordHash.Equals(passwordHash);
     }
 
     public List<string> GetUserRoles(string username)
@@ -87,14 +81,13 @@ public class UserService
         return false;
     }
 
-    public bool RegisterUser(User creator, string username, string password)
+    public bool RegisterUser(User creator, string username, string passwordHash)
     {
         if (!IsAdministrator(creator.Username))
         {
             return false;
         }
 
-        var passwordHash = PasswordHelper.CreateHash(password);
         var newUser = new User
         {
             Username = username,
@@ -168,6 +161,25 @@ public class UserService
 
         _db.UserHasRoles.Add(userHasRole);
 
+        _db.SaveChanges();
+        return true;
+    }
+
+    public bool ChangePassword(User creator, string username, string passwordHash)
+    {
+        if (creator.Username != username && !IsAdministrator(creator.Username))
+        {
+            return false;
+        }
+
+        var user = GetUser(username);
+
+        if (user == null)
+        {
+            return false;
+        }
+
+        user.PasswordHash = passwordHash;
         _db.SaveChanges();
         return true;
     }

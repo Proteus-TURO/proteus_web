@@ -22,4 +22,4 @@ public class LogoutController : ControllerBase
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         return Redirect("/");
     }
-}
+}   

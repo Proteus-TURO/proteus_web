@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 using MySqlConnector;
 using ProteusWeb.Database;
 using ProteusWeb.Database.Tables;
-using ProteusWeb.Helper;
 
 namespace ProteusWeb.Controller;
 
@@ -16,9 +15,11 @@ namespace ProteusWeb.Controller;
 public class TestController : ControllerBase
 {
     private readonly UserService _userService;
-    public TestController(UserService userService)
+    private readonly ArticleService _articleService;
+    public TestController(UserService userService, ArticleService articleService)
     {
         _userService = userService;
+        _articleService = articleService;
     }
     
     [HttpGet]

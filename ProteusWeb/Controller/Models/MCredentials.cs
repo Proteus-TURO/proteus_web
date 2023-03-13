@@ -1,7 +1,7 @@
 namespace ProteusWeb.Controller.Models;
 
-public class Credentials
+public class MCredentials
 {
     public string username { get; set; }
-    public string password { get; set; }
+    public string passwordHash { get; set; }
 }

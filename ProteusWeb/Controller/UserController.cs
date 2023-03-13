@@ -3,12 +3,12 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using ProteusWeb.Controller.Models;
 using ProteusWeb.Database;
 using ProteusWeb.Database.Tables;
-using ProteusWeb.Helper;
 
 namespace ProteusWeb.Controller;
 
@@ -29,62 +29,69 @@ public class UserController : ControllerBase
     //Hoffentlich passt des Killi <3
     [Authorize(Roles = "administrator")]
     [HttpPost("CreateUser")]
-    public async Task<ActionResult> CreateUser(string username, string password)
-    {   
+    public async Task<ActionResult> CreateUser([FromBody] MCredentials mCredentials)
+    {
         // Gibts den Username schon?
-        if (_userService.GetUserByUsername(username) != null)
+        if (_userService.GetUser(mCredentials.username) != null)
         {
-            return Conflict("The username is already taken");
+            return BadRequest("The username is already taken");
         }
-
-        // Hash the password
-        var hashedPassword = PasswordHelper.createHash(password);
-
-        // Userobjekt wird erstellt
-        var newUser = new User
-        {
-            Username = user.Username,
-            PasswordHash = hashedPassword
-        };
 
         // Gerad angemeldeter Benutzer der diese Funktion aufruft
         var currentUser = _userService.GetUser(HttpContext);
 
-        // Neuer Benutzer wird vom currentUser angelegt
-        _userService.RegisterUser(currentUser, username, password);
+        if (currentUser == null)
+        {
+            return StatusCode(500);
+        }
 
-        return Ok();
+        // Neuer Benutzer wird vom currentUser angelegt
+        var result = _userService.RegisterUser(currentUser, mCredentials.username, mCredentials.passwordHash);
+
+        return result ? Ok() : StatusCode(500);
     }
 
 
     [Authorize]
     [HttpPost("ChangeOwnPassword")]
-    public async Task<IActionResult> ChangeOwnPassword(string newPassword)
+    public async Task<ActionResult> ChangeOwnPassword([FromBody] MPasswordHash mPasswordHash)
     {
-        // Nur ein angemeldeter Benutzer kann sein eigenes Passwort ändern
+        // Nur ein angemeldeter Benutzer kann sein eigenes Passwort ï¿½ndern
         var currentUser = _userService.GetUser(HttpContext);
 
-        if (string.IsNullOrEmpty(newPassword))
+        if (currentUser == null)
+        {
+            return BadRequest("You have to be logged in");
+        }
+
+        if (string.IsNullOrEmpty(mPasswordHash.passwordHash))
         {
             return BadRequest("New password is required.");
         }
 
-        // Generiere einen Hash für das neue Passwort
-        var newHashedPassword = PasswordHelper.CreateHash(newPassword);
+        var result = _userService.ChangePassword(currentUser, currentUser.Username, mPasswordHash.passwordHash);
 
-        // Ändere das Passwort des aktuellen Benutzers in der Datenbank
-        currentUser.PasswordHash = newHashedPassword;
-        _userService.UpdateUser(currentUser);
-
-        return Ok();
+        return result ? Ok() : StatusCode(500);
     }
 
-
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "administrator")]
     [HttpPost("ChangeOtherPassword")]
-    public async Task<ActionResult> ChangeOtherPassword(PasswordChangeModel passwordChangeModel)
+    public async Task<ActionResult> ChangeOtherPassword([FromBody] MCredentials mCredentials)
     {
-        // Nur der Admin kann das Passwort eines anderen Benutzers ändern
-        // Fügen Sie hier Code hinzu, um das Passwort des Benutzers in der Datenbank zu
+        var currentUser = _userService.GetUser(HttpContext);
 
+        if (currentUser == null)
+        {
+            return Unauthorized();
+        }
+
+        if (string.IsNullOrEmpty(mCredentials.passwordHash))
+        {
+            return BadRequest("New password is required.");
+        }
+
+        var result = _userService.ChangePassword(currentUser, mCredentials.username, mCredentials.passwordHash);
+
+        return result ? Ok() : StatusCode(500);
     }
+}

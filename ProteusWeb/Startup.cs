@@ -64,6 +64,7 @@ public class Startup
             options.UseMySql(connectionString, new MySqlServerVersion("8.0.21-mysql"));
         });
         services.AddScoped<UserService>();
+        services.AddScoped<ArticleService>();
 
 
         var signingKey = Configuration.GetValue<string>("SigningKey");
@@ -100,8 +101,7 @@ public class Startup
             options.Cookie.Name = "Proteus.Cookie";
             options.LoginPath = "/Login";
             options.LogoutPath = "/Logout";
-            options.ExpireTimeSpan = TimeSpan.FromHours(24);
-        });;
+        });
 
         services.AddAuthorization(options =>
         {

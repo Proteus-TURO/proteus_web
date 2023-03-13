@@ -14,13 +14,13 @@ namespace ProteusWeb.Controller;
 
 [ApiController]
 [Route("/api/[controller]")]
-public class LoginController : ControllerBase
+public class ArticleController : ControllerBase
 {
     private readonly UserService _userService;
     private readonly IConfiguration _configuration;
     private const int MinutesUntilExpires = 24 * 60;
 
-    public LoginController(UserService userService, IConfiguration configuration)
+    public ArticleController(UserService userService, IConfiguration configuration)
     {
         _userService = userService;
         _configuration = configuration;
