@@ -174,6 +174,53 @@ public class UserService
         _db.SaveChanges();
         return true;
     }
+    
+    public bool RemoveAllRolesFromUser(User creator, string username)
+    {
+        if (!IsAdministrator(creator.Username))
+        {
+            return false;
+        }
+
+        var user = GetUser(username);
+        if (user == null)
+        {
+            return false;
+        }
+
+        var userHasRole = (from uhr in _db.UserHasRoles 
+            where uhr.UserId == user.Id
+            select uhr).ToList();
+
+        foreach (var uhr in userHasRole)
+        {
+            _db.UserHasRoles.Remove(uhr);
+        }
+
+        _db.SaveChanges();
+        return true;
+    }
+    
+    public bool ChangeRoles(User creator, string username, List<string> roles)
+    {
+        if (!IsAdministrator(creator.Username))
+        {
+            return false;
+        }
+
+        var user = GetUser(username);
+        if (user == null)
+        {
+            return false;
+        }
+
+        if (!RemoveAllRolesFromUser(creator, username))
+        {
+            return false;
+        }
+
+        return roles.All(role => AddRoleToUser(creator, username, role));
+    }
 
     public bool ChangePassword(User creator, string username, string passwordHash)
     {

@@ -13,7 +13,7 @@ public class DatabaseContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<UserHasRole>()
-            .HasKey(ur => new { ur.UserId, ur.RoleID });
+            .HasKey(ur => new { ur.UserId, ur.RoleId });
     }
 
     public DbSet<User> Users { get; set; }
