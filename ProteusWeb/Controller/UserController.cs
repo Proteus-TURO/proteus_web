@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using ProteusWeb.Controller.Models;
 using ProteusWeb.Database;
@@ -84,6 +85,22 @@ public class UserController : ControllerBase
         }
 
         var result = _userService.ChangePassword(currentUser, mCredentials.username, mCredentials.passwordHash);
+
+        return result ? Ok() : StatusCode(500);
+    }
+    
+    [Authorize(Roles = "administrator")]
+    [HttpPost("ChangeRoles")]
+    public async Task<ActionResult> ChangeRoles([FromBody] MRoles mRoles)
+    {
+        var currentUser = _userService.GetUser(HttpContext);
+
+        if (currentUser == null)
+        {
+            return Unauthorized();
+        }
+
+        var result = _userService.ChangeRoles(currentUser, mRoles.username, mRoles.roles);
 
         return result ? Ok() : StatusCode(500);
     }
