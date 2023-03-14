@@ -59,7 +59,7 @@ public class UserService
 
         var roles = _db.UserHasRoles
             .Where(ur => ur.UserId == user.Id)
-            .Join(_db.Roles, ur => ur.RoleID, r => r.Id, (ur, r) => r.Name)
+            .Join(_db.Roles, ur => ur.RoleId, r => r.Id, (ur, r) => r.Name)
             .ToList();
 
         return roles;
@@ -74,6 +74,16 @@ public class UserService
     public bool IsAdministrator(string username)
     {
         if (HasRole(username, "administrator"))
+        {
+            return true;
+        }
+
+        return false;
+    }
+    
+    public bool IsEditor(string username)
+    {
+        if (HasRole(username, "editor"))
         {
             return true;
         }
@@ -155,7 +165,7 @@ public class UserService
 
         var userHasRole = new UserHasRole
         {
-            RoleID = r.Id,
+            RoleId = r.Id,
             UserId = user.Id
         };
 

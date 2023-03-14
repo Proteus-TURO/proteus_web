@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using ProteusWeb.Controller.Models;
@@ -17,57 +18,72 @@ namespace ProteusWeb.Controller;
 public class ArticleController : ControllerBase
 {
     private readonly UserService _userService;
+    private readonly ArticleService _articleService;
     private readonly IConfiguration _configuration;
     private const int MinutesUntilExpires = 24 * 60;
 
-    public ArticleController(UserService userService, IConfiguration configuration)
+    public ArticleController(UserService userService, ArticleService articleService, IConfiguration configuration)
     {
         _userService = userService;
+        _articleService = articleService;
         _configuration = configuration;
     }
 
-    [HttpPost]
-    public async Task<ActionResult> Login([FromBody] MCredentials mCredentials)
+    [HttpPost("New")]
+    [Authorize(Roles = "editor")]
+    public async Task<ActionResult> New([FromBody] MArticlePost mArticlePost)
     {
-        var isValidUser = _userService.ValidPassword(mCredentials.username, mCredentials.passwordHash);
-        if (!isValidUser) return Unauthorized("username or password incorrect");
-        var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.Name, mCredentials.username)
-        };
-        claims.AddRange(_userService.GetUserRoles(mCredentials.username).Select(role => new Claim(ClaimTypes.Role, role)));
+        var currentUser = _userService.GetUser(HttpContext);
 
-        var signingKey = _configuration.GetValue<string>("SigningKey");
-
-        if (signingKey == null)
+        if (currentUser == null)
         {
-            // TODO: Error
-            return StatusCode(500);
+            return Unauthorized();
         }
 
-        var token = new JwtSecurityToken(
-            claims: claims,
-            expires: DateTime.Now.AddMinutes(MinutesUntilExpires),
-            signingCredentials: new SigningCredentials(
-                new SymmetricSecurityKey(PasswordHelper.StringToBytes(signingKey)),
-                SecurityAlgorithms.HmacSha256Signature)
-        );
-        
-        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-        var principal = new ClaimsPrincipal(identity);
+        var result = _articleService.CreateArticle(mArticlePost.topic, mArticlePost.title, mArticlePost.content, currentUser);
 
-        var authProperties = new AuthenticationProperties
+        return result ? Ok() : StatusCode(500);
+    }
+    
+    [HttpGet("GetTitles")]
+    [Authorize]
+    public async Task<ActionResult> GetTitles()
+    {
+        var currentUser = _userService.GetUser(HttpContext);
+
+        if (currentUser == null)
         {
-            ExpiresUtc = DateTime.UtcNow.AddMinutes(MinutesUntilExpires),
-            IsPersistent = true
-        };
+            return Unauthorized();
+        }
 
-        var authTicket = new AuthenticationTicket(new ClaimsPrincipal(principal), authProperties,
-            CookieAuthenticationDefaults.AuthenticationScheme);
+        var articles = _articleService.GetAllArticles();
 
-        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, authTicket.Principal, authTicket.Properties);
+        var ret = new Dictionary<string, List<string>>();
 
-        return Ok(new { Token = new JwtSecurityTokenHandler().WriteToken(token) });
+        foreach (var article in articles)
+        {
+            if (!ret.ContainsKey(article.Topic))
+            {
+                ret.Add(article.Topic, new List<string>());
+            }
+            
+            ret[article.Topic].Add(article.Title);
+        }
 
+        return Ok(ret);
+    }
+    
+    [HttpGet("GetContent")]
+    [Authorize]
+    public async Task<ActionResult> GetContent([FromQuery] MGetContent mGetContent)
+    {
+        var article = _articleService.GetArticle(mGetContent.topic, mGetContent.title);
+
+        if (article == null)
+        {
+            return BadRequest("Article not found");
+        }
+
+        return Ok(article.Content);
     }
 }

@@ -16,12 +16,45 @@ public class ArticleService
         _db = db;
         _userService = userService;
     }
-    
-    
 
-    public bool CreateArticle(string title, string content, string topic, User creator)
+    private bool ArticleAlreadyExist(string topic, string title)
     {
+        return Enumerable.Any(_db.Articles, article => article.Topic == topic && article.Title == title);
+    }
 
+    public bool CreateArticle(string topic, string title, string content, User creator)
+    {
+        if (!_userService.IsEditor(creator.Username))
+        {
+            return false;
+        }
+        
+        if (ArticleAlreadyExist(topic, title))
+        {
+            return false;
+        }
+        
+        var newArticle = new Article
+        {
+            Title = title,
+            Content = content,
+            Topic = topic,
+            CreatedBy = creator.Id,
+            CreatedAt = DateTime.Now
+        };
+
+        _db.Articles.Add(newArticle);
+        _db.SaveChanges();
         return true;
+    }
+
+    public List<Article> GetAllArticles()
+    {
+        return _db.Articles.ToList();
+    }
+
+    public Article? GetArticle(string topic, string title)
+    {
+        return Enumerable.FirstOrDefault(_db.Articles, article => article.Topic == topic && article.Title == title);
     }
 }

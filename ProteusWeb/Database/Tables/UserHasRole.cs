@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,11 +13,5 @@ public class UserHasRole
 
     [Column("role_id")]
     [ForeignKey("Role")]
-    public int RoleID { get; set; }
-
-    [Required]
-    public virtual User User { get; set; }
-
-    [Required]
-    public virtual Role Role { get; set; }
+    public int RoleId { get; init; }
 }
