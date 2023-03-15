@@ -133,7 +133,7 @@ function login() {
 
   console.log(usernameString, passwordHash);
 
-  const LOGIN_API = "https://localhost/api/Login";
+  const LOGIN_API = `https://${window.location.host}/api/Login`;
   return new Promise((resolve, reject) => {
       fetch(LOGIN_API, {
           method: "POST",
