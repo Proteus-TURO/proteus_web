@@ -142,13 +142,12 @@ function login() {
               "accept": "*/*"
           },
           body: JSON.stringify({
-              username: usernameString,
-              password: passwordHash
+              "username": usernameString,
+              "passwordHash": passwordHash
           })
       }).then(response => {
           return console.log(response.json());
       }).then(data => {
-          resolve(data["token"]);
           localStorage.setItem("key", data["token"]);
           window.location.href = "../html/personal.html";
       }).catch((error) => {
