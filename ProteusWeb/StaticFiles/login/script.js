@@ -133,7 +133,7 @@ function login() {
 
   console.log(usernameString, passwordHash);
 
-  const LOGIN_API = "https://10.10.30.43/api/Login";
+  const LOGIN_API = "https://localhost/api/Login";
   return new Promise((resolve, reject) => {
       fetch(LOGIN_API, {
           method: "POST",
@@ -146,7 +146,7 @@ function login() {
               "passwordHash": passwordHash
           })
       }).then(response => {
-          return console.log(response.json());
+          return response.json();
       }).then(data => {
           localStorage.setItem("key", data["token"]);
           window.location.href = "../html/personal.html";
