@@ -122,7 +122,7 @@ function logOut() {
 const killianTitles = [];
 
 async function getTitles() {
-    const response = await fetch('https://localhost/api/Article/GetTitles');
+    const response = await fetch(`https://${window.location.host}/api/Article/GetTitles`);
     const data = await response.json();
 
     const titles = data.Diary ? data.Diary.join(', ') : '';
@@ -151,7 +151,7 @@ function setInformation(title) {
 }
 
 async function setContent(title){
-    const response = await fetch(`https://localhost/api/Article/GetContent?topic=Diary&title=${encodeURIComponent(title)}`);
+    const response = await fetch(`https://${window.location.host}/api/Article/GetContent?topic=Diary&title=${encodeURIComponent(title)}`);
     const data = await response.text();
     
     const info = document.getElementById("contentInfo");
