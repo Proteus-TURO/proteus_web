@@ -105,6 +105,6 @@ function logOut() {
             "accept": "*/*"
         }
     });
-  }).then(console.log("Ausgelogged"))
+  }).then(window.location.href = "${window.location.host}/index2.html")
   .catch(error => console.log(error));
 }

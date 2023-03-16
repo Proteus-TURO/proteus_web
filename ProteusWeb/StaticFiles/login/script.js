@@ -149,7 +149,7 @@ function login() {
           return response.json();
       }).then(data => {
           localStorage.setItem("key", data["token"]);
-          window.location.href = "../html/personal.html";
+          window.location.href = "../private/personal.html";
       }).catch((error) => {
           reject(error);
       });
