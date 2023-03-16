@@ -38,9 +38,6 @@
         </div>
         <ul class="sub-menu">
           <li><a class="link_name" href="#">Diary</a></li>
-          <li><a href="#">Day 1</a></li>
-          <li><a href="#">Day 2</a></li>
-          <li><a href="#">Day 3</a></li>
           <li><a href="#" onclick="startEditor()">New +</a></li>
         </ul>
       </li>
@@ -93,15 +90,17 @@
   </li>
 </ul>
   </div>
-  <section class="home-section">
+  <section class="home-section" data-title="Page Title">
     <div class="home-content">
-      <i class='bx bx-menu' ></i>
+      <i class='bx bx-menu'></i>
+      <h1 id="titleDB">Title</h1>
     </div>
     <div id="forBorder">
-    <button id="editButton">
+      <button id="editButton">
         <img id="editPic" src="edit.svg">
-    </button>
+      </button>
     </div>
+    <p id="contentInfo"></p>
   </section>
   <script src="private.js"></script>
 </body>

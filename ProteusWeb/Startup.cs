@@ -24,6 +24,9 @@ public class Startup
     public void ConfigureServices(IServiceCollection services)
     {
         services.AddControllers();
+        //---------------------------------------------------------------------------------
+        services.AddCors();
+        //---------------------------------------------------------------------------------
         services.AddSwaggerGen(c =>
         {
             c.SwaggerDoc("v1", new OpenApiInfo { Title = "Proteus API", Version = "v1" });
@@ -121,6 +124,10 @@ public class Startup
         app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "Proteus API"); });
         app.UseAuthentication();
         app.UseAuthorization();
+
+        //---------------------------------------------------------------------------------
+        app.UseCors(x => x.AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin());
+        //---------------------------------------------------------------------------------
 
         app.Use(async (context, next) =>
         {

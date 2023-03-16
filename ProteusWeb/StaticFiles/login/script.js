@@ -151,6 +151,7 @@ function login() {
           localStorage.setItem("key", data["token"]);
           window.location.href = "../private/personal.html";
       }).catch((error) => {
+          console.log("Fehler");
           reject(error);
       });
   });

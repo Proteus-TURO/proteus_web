@@ -1,3 +1,13 @@
+
+window.addEventListener('load', async function() {
+    const link = document.querySelector('.sub-menu li:first-child a');
+    const titles = await getTitles();
+    console.log(titles);
+
+    addNewLinks(titles);
+});
+
+
 let arrow = document.querySelectorAll(".arrow");
 for (var i = 0; i < arrow.length; i++) {
   arrow[i].addEventListener("click", (e)=>{
@@ -107,4 +117,43 @@ function logOut() {
     });
   }).then(window.location.href = "${window.location.host}/index2.html")
   .catch(error => console.log(error));
+}
+
+const killianTitles = [];
+
+async function getTitles() {
+    const response = await fetch('https://localhost/api/Article/GetTitles');
+    const data = await response.json();
+
+    const titles = data.Diary ? data.Diary.join(', ') : '';
+
+    return titles;
+}
+
+async function addNewLinks(titles) {
+    const link = document.querySelector('.sub-menu li:nth-child(2) a');
+
+    titles.split(', ').forEach(title => {
+        const newLink = link.cloneNode(true);
+        newLink.textContent = `${title}`;
+        newLink.setAttribute('href', '#');
+        newLink.setAttribute('onclick', `setInformation("${title}")`);
+
+        link.parentNode.insertBefore(newLink, link.nextSibling);
+    });
+}
+
+function setInformation(title) {
+    const tit = document.getElementById("titleDB");
+    tit.textContent = title;
+    
+    setContent(title);
+}
+
+async function setContent(title){
+    const response = await fetch(`https://localhost/api/Article/GetContent?topic=Diary&title=${encodeURIComponent(title)}`);
+    const data = await response.text();
+    
+    const info = document.getElementById("contentInfo");
+    info.textContent = data;
 }
