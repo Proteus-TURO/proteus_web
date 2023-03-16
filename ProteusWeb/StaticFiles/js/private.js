@@ -12,7 +12,7 @@ sidebarBtn.addEventListener("click", ()=>{
   sidebar.classList.toggle("close");
 });
 
-document.getElementById('markdown').innerHTML = marked.parse('# Marked in the browser\n\nRendered by **marked**.');
+//document.getElementById('markdown').innerHTML = marked.parse('# Marked in the browser\n\nRendered by **marked**.');
 
 
 //Diary Functional Code
@@ -84,3 +84,27 @@ function sendDataToDatabase(title, content) {
 
 
 //DATABASE
+// finden Sie das Element "bx bx-log-out"
+document.addEventListener("DOMContentLoaded", function() {
+  let logOutButton = document.getElementById('logoutbtn');
+  console.log(logOutButton);
+  // Hinzufügen eines Klickereignis-Listeners auf das "bx bx-log-out" -Symbol
+  logOutButton.addEventListener('click', logOut);
+});
+
+// Funktion, die aufgerufen wird, wenn auf das "bx bx-log-out" -Symbol geklickt wird
+function logOut() {
+  console.log("Vorgang Ausloggen!");
+  // Hier können Sie den Code schreiben, der den Benutzer ausloggt und ihn zur Anmeldeseite weiterleitet
+  const LOGIN_API = `https://${window.location.host}/api/Logout`;
+  return new Promise((resolve, reject) => {
+    fetch(LOGIN_API, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "accept": "*/*"
+        }
+    });
+  }).then(console.log("Ausgelogged"))
+  .catch(error => console.log(error));
+}
