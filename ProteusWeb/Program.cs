@@ -27,8 +27,8 @@ public static class Program
             .UseStartup<Startup>()
             .UseKestrel(options =>
             {
-                options.ListenAnyIP(12345);
-                options.ListenAnyIP(12346, listenOptions =>
+                options.ListenAnyIP(80);
+                options.ListenAnyIP(443, listenOptions =>
                 {
                     listenOptions.UseHttps("server.pfx", signingKey);
                 });
