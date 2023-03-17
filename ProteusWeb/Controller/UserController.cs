@@ -23,10 +23,10 @@ public class UserController : ControllerBase
     //Hoffentlich passt des Killi <3
     [Authorize(Roles = "administrator")]
     [HttpPost("CreateUser")]
-    public async Task<ActionResult> CreateUser([FromBody] MCredentials mCredentials)
+    public async Task<ActionResult> CreateUser([FromBody] MCreateUser mCreateUser)
     {
         // Gibts den Username schon?
-        if (_userService.GetUser(mCredentials.username) != null)
+        if (_userService.GetUser(mCreateUser.username) != null)
         {
             return BadRequest("The username is already taken");
         }
@@ -40,7 +40,7 @@ public class UserController : ControllerBase
         }
 
         // Neuer Benutzer wird vom currentUser angelegt
-        var result = _userService.RegisterUser(currentUser, mCredentials.username, mCredentials.passwordHash);
+        var result = _userService.RegisterUser(currentUser, mCreateUser.username, mCreateUser.passwordHash, mCreateUser.fullName, mCreateUser.title);
 
         return result ? Ok() : StatusCode(500);
     }

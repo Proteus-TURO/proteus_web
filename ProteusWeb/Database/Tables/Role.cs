@@ -10,6 +10,5 @@ public class Role
     [Key]
     public int Id { get; set; }
 
-    [Column("name")]
-    public string Name { get; set; }
+    [Column("name")] public string Name { get; set; } = "";
 }

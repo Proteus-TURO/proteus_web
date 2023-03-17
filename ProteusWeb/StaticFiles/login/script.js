@@ -134,7 +134,9 @@ function login() {
 
   let md = forge.md.sha256.create();
   md.update(passwordString);
-  let passwordHash = md.digest().toHex();
+  let buffer = md.digest().toHex();
+  let arrayBuffer = forge.util.hexToBytes(buffer);
+  let passwordHash = btoa(arrayBuffer);
 
   console.log(usernameString, passwordHash);
 

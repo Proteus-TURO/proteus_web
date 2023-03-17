@@ -91,7 +91,7 @@ public class UserService
         return false;
     }
 
-    public bool RegisterUser(User creator, string username, string passwordHash)
+    public bool RegisterUser(User creator, string username, string passwordHash, string fullName, string title)
     {
         if (!IsAdministrator(creator.Username))
         {
@@ -101,7 +101,9 @@ public class UserService
         var newUser = new User
         {
             Username = username,
-            PasswordHash = passwordHash
+            PasswordHash = passwordHash,
+            FullName = fullName,
+            Title = title
         };
 
         _db.Users.Add(newUser);
