@@ -208,7 +208,6 @@
   font-weight: 500;
   white-space: nowrap;
 }
-.sidebar.close .profile-details i,
 .sidebar.close .profile-details .profile_name,
 .sidebar.close .profile-details .job{
   display: none;

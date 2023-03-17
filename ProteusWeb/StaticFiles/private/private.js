@@ -28,7 +28,9 @@ sidebarBtn.addEventListener("click", ()=>{
 //Diary Functional Code
 function startEditor() {
 
-document.getElementById('editButton').remove();
+    if(document.getElementById('editButton')) {
+        document.getElementById('editButton').remove();
+    }
   // Erstelle HTML-Code für die Textfelder
   const formHTML = `
     <form id="text-editor-form">
@@ -78,11 +80,15 @@ document.getElementById('editButton').remove();
   contentInput.style.gridRow = '2';
   const postButton = document.querySelector('#post-button');
   postButton.style.gridRow = '3';
+  
+  //Ändere den Titel zu "New Post", ausblenden Content
+    document.getElementById("titleDB").textContent = "New Post";
+    document.getElementById("contentInfo").textContent = "";
 }
 
 // Füge einen Event Listener zum Edit Button hinzu
-const editButton = document.querySelector('#editButton');
-editButton.addEventListener('click', startEditor);
+/////////const editButton = document.querySelector('#editButton');
+////////editButton.addEventListener('click', startEditor);
 
 // Funktion zum Senden der Daten an die Datenbank
 function sendDataToDatabase(title, content) {
@@ -95,32 +101,27 @@ function sendDataToDatabase(title, content) {
 
 //DATABASE
 // finden Sie das Element "bx bx-log-out"
-document.addEventListener("DOMContentLoaded", function() {
-  let logOutButton = document.getElementById('logoutbtn');
-  console.log(logOutButton);
-  // Hinzufügen eines Klickereignis-Listeners auf das "bx bx-log-out" -Symbol
-  logOutButton.addEventListener('click', logOut);
-});
+let logOutButton = document.getElementById('logoutbtn');
+console.log(logOutButton);
+// Hinzufügen eines Klickereignis-Listeners auf das "bx bx-log-out" -Symbol
+logOutButton.addEventListener('click', logOut);
 
 // Funktion, die aufgerufen wird, wenn auf das "bx bx-log-out" -Symbol geklickt wird
 function logOut() {
   console.log("Vorgang Ausloggen!");
   // Hier können Sie den Code schreiben, der den Benutzer ausloggt und ihn zur Anmeldeseite weiterleitet
-  const LOGIN_API = `https://${window.location.host}/api/Logout`;
+  const LOGOUT_API = `https://${window.location.host}/api/Logout`;
   return new Promise((resolve, reject) => {
-    fetch(LOGIN_API, {
+    fetch(LOGOUT_API, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
             "accept": "*/*"
         }
     });
-  }).then(window.location.href = "${window.location.host}/index2.html")
+  }).then(window.location.href = `https://${window.location.host}/index2.html`)
   .catch(error => console.log(error));
 }
-
-const killianTitles = [];
-
 async function getTitles() {
     const response = await fetch(`https://${window.location.host}/api/Article/GetTitles`);
     const data = await response.json();
@@ -144,8 +145,16 @@ async function addNewLinks(titles) {
 }
 
 function setInformation(title) {
+    let element = document.getElementById("text-editor-form");
+    if (element) {
+        element.remove();
+    } else {
+        console.log("Gibt es nicht! " + element);
+    }
+    
     const tit = document.getElementById("titleDB");
     tit.textContent = title;
+    tit.style.marginLeft = 4 + '%';
     
     setContent(title);
 }
@@ -156,4 +165,5 @@ async function setContent(title){
     
     const info = document.getElementById("contentInfo");
     info.textContent = data;
+    info.style.marginLeft = 4 + '%';
 }

@@ -118,7 +118,11 @@ $.getScript("https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles
     );
 
 });
-
+document.addEventListener("keydown", function(event) {
+  if (event.key === "Enter") {
+    login();
+  }
+});
 
 //LOGIN SCRIPT
 function login() {
@@ -152,6 +156,7 @@ function login() {
           window.location.href = "../private/personal.html";
       }).catch((error) => {
           console.log("Fehler");
+          window.alert("Falscher Username / Falsches Passwort!")
           reject(error);
       });
   });
