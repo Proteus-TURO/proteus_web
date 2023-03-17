@@ -104,4 +104,24 @@ public class UserController : ControllerBase
 
         return result ? Ok() : StatusCode(500);
     }
+    
+    [Authorize]
+    [HttpGet("GetUserInfo")]
+    public async Task<ActionResult> GetUserInfo()
+    {
+        var currentUser = _userService.GetUser(HttpContext);
+
+        if (currentUser == null)
+        {
+            return Unauthorized();
+        }
+
+        var ret = new Dictionary<string, string>
+        {
+            { "fullName", currentUser.FullName },
+            { "title", currentUser.Title }
+        };
+
+        return Ok(ret);
+    }
 }
