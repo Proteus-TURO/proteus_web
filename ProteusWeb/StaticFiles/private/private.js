@@ -158,7 +158,6 @@ function setInformation(title) {
     
     setContent(title);
 }
-
 async function setContent(title){
     const response = await fetch(`https://${window.location.host}/api/Article/GetContent?topic=Diary&title=${encodeURIComponent(title)}`);
     const data = await response.text();

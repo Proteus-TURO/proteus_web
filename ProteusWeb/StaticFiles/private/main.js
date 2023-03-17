@@ -18,6 +18,7 @@ function logout() {
     });
 }
 
+
 loginButton.addEventListener("click", async () => {
     try {
         await logout();
