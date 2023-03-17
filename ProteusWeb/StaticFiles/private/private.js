@@ -45,7 +45,7 @@ function startEditor() {
           <textarea id="content-input" name="content-input"></textarea>
         </div>
       </div>  
-      <button type="submit" id="post-button">Erstellen</button>
+      <button type="submit" onClick="createContent()" id="post-button">Erstellen</button>
     </form>
   `;
 
@@ -71,8 +71,6 @@ function startEditor() {
     sendDataToDatabase(title, content);
     // Entferne das Textfeld und den Edit-Button
     form.remove();
-    const editButton = document.querySelector('#editButton');
-    editButton.remove();
   });
 
   // Platziere die Textfelder im Grid-Container
@@ -129,13 +127,41 @@ async function getTitles() {
     const response = await fetch(`https://${window.location.host}/api/Article/GetTitles`);
     const data = await response.json();
 
-    const titles = data.Diary ? data.Diary.join(', ') : '';
+    const titles = data.diary ? data.diary.join(', ') : '';
 
     return titles;
 }
 
+function createContent() {
+    const topic = "diary";
+    const title = document.getElementById("title-input").value;
+    const content = document.getElementById("content-input").value;
+
+    fetch(`https://${window.location.host}/api/Article/New`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            "topic": topic,
+            "title": title,
+            "content": content
+        })
+    })
+        .then(response => response.json())
+        .then(data => {
+            console.log("Erfolgreich! " + data);
+            location.reload();
+        })
+        .catch(error => {
+            console.error("Fehler! " + error);
+            location.reload();
+        });
+}
+
 async function addNewLinks(titles) {
     const link = document.querySelector('.sub-menu li:nth-child(2) a');
+    const newLinkContainer = document.getElementById('newLink');
 
     titles.split(', ').forEach(title => {
         const newLink = link.cloneNode(true);
@@ -143,7 +169,7 @@ async function addNewLinks(titles) {
         newLink.setAttribute('href', '#');
         newLink.setAttribute('onclick', `setInformation("${title}")`);
 
-        link.parentNode.insertBefore(newLink, link.nextSibling);
+        newLinkContainer.parentNode.insertBefore(newLink, newLinkContainer);
     });
 }
 
@@ -162,7 +188,7 @@ function setInformation(title) {
     setContent(title);
 }
 async function setContent(title){
-    const response = await fetch(`https://${window.location.host}/api/Article/GetContent?topic=Diary&title=${encodeURIComponent(title)}`);
+    const response = await fetch(`https://${window.location.host}/api/Article/GetContent?topic=diary&title=${encodeURIComponent(title)}`);
     const data = await response.text();
     
     const info = document.getElementById("contentInfo");
