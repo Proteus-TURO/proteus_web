@@ -357,3 +357,25 @@
   #post-button:hover {
     background-color: #0062cc;
   }
+
+  
+#delbtn {
+  margin-left: 90%;
+  visibility: hidden;
+  background-color: transparent;
+  border-radius: 5px;
+  border: 2px solid black;
+  color: black;
+  font-weight: bold;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  transition-duration: 0.5s;
+}
+
+#delbtn:hover {
+  background-color: black;
+  color: white;
+  transition-duration: 0.5s;
+}

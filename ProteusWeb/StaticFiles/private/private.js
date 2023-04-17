@@ -159,6 +159,9 @@ function createContent() {
         });
 }
 
+function deleteElement(){
+    
+}
 async function addNewLinks(titles) {
     const link = document.querySelector('.sub-menu li:nth-child(2) a');
     const newLinkContainer = document.getElementById('newLink');
@@ -194,4 +197,7 @@ async function setContent(title){
     const info = document.getElementById("contentInfo");
     info.textContent = data;
     info.style.marginLeft = 4 + '%';
+    
+    const btn = document.getElementById("delbtn");
+    btn.style.visibility = "visible";
 }
