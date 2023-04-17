@@ -125,7 +125,7 @@ if (navigator.userAgentData.mobile) {
     console.log('mobile');
     document.getElementById('particles-js').style.display = 'none';
     let box = document.getElementById('login-box');
-    box.style.zoom = 1.2 * Math.min(window.innerWidth / box.offsetWidth, window.innerHeight / box.offsetHeight);
+    box.style.zoom = Math.min(window.innerWidth / box.offsetWidth, window.innerHeight / box.offsetHeight);
 }
 
 document.addEventListener("keydown", async function (event) {
