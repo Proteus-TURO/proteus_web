@@ -19,5 +19,9 @@ public class User
 
     [Column("full_name")] public string FullName { get; set; } = "";
 
-    [Column("title")] public string Title { get; set; } = "";
+    [Column("title")] public string? Title { get; set; } = "";
+    
+    [Column("role_id")] 
+    [ForeignKey("Role.id")]
+    public int RoleId { get; set; } = 3;
 }

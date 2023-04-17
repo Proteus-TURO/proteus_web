@@ -35,7 +35,13 @@ public class LoginController : ControllerBase
         {
             new Claim(ClaimTypes.Name, mCredentials.username)
         };
-        claims.AddRange(_userService.GetUserRoles(mCredentials.username).Select(role => new Claim(ClaimTypes.Role, role)));
+        var role = _userService.GetRole(mCredentials.username) ?? new Role
+        {
+            Id = 3,
+            Name = "viewer"
+        };
+        
+        claims.Add(new Claim(ClaimTypes.Role, role.Name));
 
         var signingKey = _configuration.GetValue<string>("SigningKey");
 

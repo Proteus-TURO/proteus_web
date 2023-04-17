@@ -1,7 +1,7 @@
 ﻿namespace ProteusWeb.Controller.Models;
 
-public class MRoles
+public class MRole
 {
     public string username { get; set; }
-    public List<string> roles { get; set; }
+    public string role { get; set; }
 }

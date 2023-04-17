@@ -90,8 +90,8 @@ public class UserController : ControllerBase
     }
     
     [Authorize(Roles = "administrator")]
-    [HttpPost("ChangeRoles")]
-    public async Task<ActionResult> ChangeRoles([FromBody] MRoles mRoles)
+    [HttpPost("ChangeRole")]
+    public async Task<ActionResult> ChangeRole([FromBody] MRole mRole)
     {
         var currentUser = _userService.GetUser(HttpContext);
 
@@ -100,7 +100,7 @@ public class UserController : ControllerBase
             return Unauthorized();
         }
 
-        var result = _userService.ChangeRoles(currentUser, mRoles.username, mRoles.roles);
+        var result = _userService.ChangeRoles(currentUser, mRole.username, mRole.role);
 
         return result ? Ok() : StatusCode(500);
     }
@@ -116,12 +116,47 @@ public class UserController : ControllerBase
             return Unauthorized();
         }
 
-        var ret = new Dictionary<string, string>
+        var role = _userService.GetRole(currentUser);
+
+        var ret = new Dictionary<string, object?>
         {
             { "fullName", currentUser.FullName },
-            { "title", currentUser.Title }
+            { "title", currentUser.Title },
+            { "role", role?.Name }
         };
 
         return Ok(ret);
+    }
+    
+    [Authorize]
+    [HttpPost("ChangeOwnFullName")]
+    public async Task<ActionResult> ChangeOwnFullName([FromBody] MChangeFullName mChangeFullName)
+    {
+        var currentUser = _userService.GetUser(HttpContext);
+
+        if (currentUser == null)
+        {
+            return Unauthorized();
+        }
+
+        var result = _userService.ChangeFullName(currentUser, currentUser.Username, mChangeFullName.newName);
+
+        return result ? Ok() : StatusCode(500);
+    }
+    
+    [Authorize]
+    [HttpPost("ChangeTitle")]
+    public async Task<ActionResult> ChangeTitle([FromBody] MChangeUserTitle mChangeUserTitle)
+    {
+        var currentUser = _userService.GetUser(HttpContext);
+
+        if (currentUser == null)
+        {
+            return Unauthorized();
+        }
+
+        var result = _userService.ChangeTitle(currentUser, currentUser.Username, mChangeUserTitle.newTitle);
+
+        return result ? Ok() : StatusCode(500);
     }
 }

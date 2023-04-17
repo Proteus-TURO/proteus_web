@@ -22,7 +22,7 @@ body, html {
 	background: rgba(48, 46, 45, 1);
 	min-height: 250px;
 	padding: 20px;
-	z-index: 9999;
+	z-index: 10;
 }
 #login-box .logo .logo-caption {
 	font-family: 'Poiret One', cursive;
@@ -78,4 +78,27 @@ body, html {
   	position: fixed;
   	top: 0px;
   	z-index:1;
+}
+#spinner-container {
+	display: none;
+	justify-content: center;
+	align-items: center;
+	height: 100vh;
+}
+#spinner {
+	border: 8px solid rgba(0, 0, 0, 0.1);
+	border-left-color: #00a9ff;
+	border-radius: 50%;
+	width: 64px;
+	height: 64px;
+	animation: spin 1s linear infinite;
+	z-index: 20;
+	filter: blur(0);
+}
+@keyframes spin {
+	to { transform: rotate(360deg); }
+}
+.blur {
+	filter: blur(10px);
+	overflow: hidden;
 }

@@ -42,6 +42,15 @@ public class UserService
 
         return username == "" ? null : GetUser(username);
     }
+    
+    public Role? GetRole(User user)
+    {
+        var role = (from r in _db.Roles
+            join u in _db.Users on r.Id equals u.Id
+            select r).ToList();
+
+        return role.Count == 0 ? null : role[0];
+    }
 
     public bool ValidPassword(string username, string passwordHash)
     {
@@ -49,46 +58,26 @@ public class UserService
         return user != null && user.PasswordHash.Equals(passwordHash);
     }
 
-    public List<string> GetUserRoles(string username)
+    public bool HasRole(string username, int roleId)
     {
         var user = GetUser(username);
         if (user == null)
         {
-            return new List<string>();
+            return false;
         }
-
-        var roles = _db.UserHasRoles
-            .Where(ur => ur.UserId == user.Id)
-            .Join(_db.Roles, ur => ur.RoleId, r => r.Id, (ur, r) => r.Name)
-            .ToList();
-
-        return roles;
-    }
-
-    public bool HasRole(string username, string role)
-    {
-        var roles = GetUserRoles(username);
-        return roles.Contains(role);
+        
+        var r = GetRole(user);
+        return r != null && r.Id == roleId;
     }
 
     public bool IsAdministrator(string username)
     {
-        if (HasRole(username, "administrator"))
-        {
-            return true;
-        }
-
-        return false;
+        return HasRole(username, 1);
     }
     
     public bool IsEditor(string username)
     {
-        if (HasRole(username, "editor"))
-        {
-            return true;
-        }
-
-        return false;
+        return HasRole(username, 2) || IsAdministrator(username);
     }
 
     public bool RegisterUser(User creator, string username, string passwordHash, string fullName, string title)
@@ -177,7 +166,18 @@ public class UserService
         return true;
     }
     
-    public bool RemoveAllRolesFromUser(User creator, string username)
+    public bool ChangeRoles(User creator, string username, string role)
+    {
+        if (!IsAdministrator(creator.Username))
+        {
+            return false;
+        }
+
+        var user = GetUser(username);
+        return user != null && AddRoleToUser(creator, username, role);
+    }
+    
+    public bool ChangeFullName(User creator, string username, string newName)
     {
         if (!IsAdministrator(creator.Username))
         {
@@ -190,20 +190,12 @@ public class UserService
             return false;
         }
 
-        var userHasRole = (from uhr in _db.UserHasRoles 
-            where uhr.UserId == user.Id
-            select uhr).ToList();
-
-        foreach (var uhr in userHasRole)
-        {
-            _db.UserHasRoles.Remove(uhr);
-        }
-
+        user.FullName = newName;
         _db.SaveChanges();
         return true;
     }
     
-    public bool ChangeRoles(User creator, string username, List<string> roles)
+    public bool ChangeTitle(User creator, string username, string? title)
     {
         if (!IsAdministrator(creator.Username))
         {
@@ -216,12 +208,9 @@ public class UserService
             return false;
         }
 
-        if (!RemoveAllRolesFromUser(creator, username))
-        {
-            return false;
-        }
-
-        return roles.All(role => AddRoleToUser(creator, username, role));
+        user.Title = title;
+        _db.SaveChanges();
+        return true;
     }
 
     public bool ChangePassword(User creator, string username, string passwordHash)
