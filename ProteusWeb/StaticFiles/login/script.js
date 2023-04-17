@@ -185,6 +185,7 @@ function _login() {
                 window.alert(`Server Error ${response.statusText}`)
                 reject(`Server Error ${response.status} ${response.statusText}`);
             }
+            // TODO: Unauthorized
             return response.json();
         }) .then(data => {
             localStorage.setItem("key", data["token"]);
