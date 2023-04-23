@@ -133,7 +133,7 @@ public class Startup
         {
             if (context.Request.Path.StartsWithSegments("/private"))
             {
-                if (context.User.Identity == null || !context.User.Identity.IsAuthenticated)
+                if (context.User.Identity is not { IsAuthenticated: true })
                 {
                     context.Response.StatusCode = 401;
                     return;
@@ -142,6 +142,7 @@ public class Startup
 
             await next();
         });
+        
         app.UseFileServer(new FileServerOptions
         {
             FileProvider = new PhysicalFileProvider(
@@ -158,6 +159,15 @@ public class Startup
                 }
             }
         });
+        
+        app.Use((context, next) =>
+        {
+            if (!context.Request.Path.StartsWithSegments("/private/web")) return next();
+            context.Response.Redirect("/private/web/", permanent: false);
+            return Task.CompletedTask;
+        });
+
+        
         app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
     }
 }

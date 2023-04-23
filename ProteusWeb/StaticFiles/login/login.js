@@ -119,7 +119,8 @@ $.getScript("https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles
 
 });
 
-console.log(navigator);
+const LOGIN_API = "/api/Login";
+const USER_INFO_API = "/api/User/GetUserInfo";
 
 if (navigator.userAgentData.mobile) {
     console.log('mobile');
@@ -136,7 +137,17 @@ document.addEventListener("keydown", async function (event) {
 
 async function login() {
     try {
-        await _login();
+        localStorage.removeItem("token");
+        localStorage.removeItem("fullName");
+        localStorage.removeItem("title");
+        localStorage.removeItem("role");
+        let loginData = await _login();
+        localStorage.setItem("token", loginData["token"]);
+        let userInfo = await _getUserInfo();
+        localStorage.setItem("fullName", userInfo["fullName"]);
+        localStorage.setItem("role", userInfo["role"]);
+        localStorage.setItem("title", userInfo["title"]);
+        window.location.href = "../private/web";
     } catch (e) {
         console.log(e);
     }
@@ -146,6 +157,34 @@ async function login() {
     particles.classList.remove('blur');
     let spinner = document.getElementById('spinner-container');
     spinner.style.display = 'none';
+}
+
+async function _getUserInfo() {
+    return new Promise((resolve, reject) => {
+        let apiToken = localStorage.getItem("token");
+        if (apiToken === null) {
+            reject("API Token is null");
+        }
+        
+        fetch(USER_INFO_API, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "accept": "*/*",
+                "Authorization": "Bearer " + apiToken
+            }
+        }).then(response => {
+            if (response.status === 401) {
+                reject(`Unauthorized ${response.status} ${response.statusText}`);
+                return;
+            }
+            else if (response.status !== 200 || !response.ok) {
+                reject(`Server Error ${response.status} ${response.statusText}`);
+                return;
+            }
+            resolve(response.json());
+        });
+    });
 }
 
 
@@ -168,7 +207,6 @@ function _login() {
 
     console.log(usernameString, passwordHash);
 
-    const LOGIN_API = `https://${window.location.host}/api/Login`;
     return new Promise((resolve, reject) => {
         fetch(LOGIN_API, {
             method: "POST",
@@ -181,18 +219,15 @@ function _login() {
                 "passwordHash": passwordHash
             })
         }).then(response => {
-            if (response.status >= 500) {
-                window.alert(`Server Error ${response.statusText}`)
-                reject(`Server Error ${response.status} ${response.statusText}`);
+            if (response.status === 401) {
+                reject(`Unauthorized ${response.status} ${response.statusText}`);
+                return;
             }
-            // TODO: Unauthorized
-            return response.json();
-        }) .then(data => {
-            localStorage.setItem("key", data["token"]);
-            window.location.href = "../private/personal.html";
-        }).catch((error) => {
-            console.log(`Fehler ${error}`);
-            reject(error);
+            else if (response.status !== 200 || !response.ok) {
+                reject(`Server Error ${response.status} ${response.statusText}`);
+                return;
+            }
+            resolve(response.json());
         });
     });
 }
