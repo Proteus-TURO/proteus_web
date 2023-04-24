@@ -86,4 +86,18 @@ public class ArticleController : ControllerBase
 
         return Ok(article.Content);
     }
+    
+    [HttpDelete("Delete/{topic}/{title}")]
+    [Authorize]
+    public async Task<ActionResult> Delete([FromRoute] string topic, [FromRoute] string title)
+    {
+        var res = _articleService.DeleteArticle(topic, title);
+
+        if (res == false)
+        {
+            return BadRequest("Article + " + topic + "/" + title + "not found");
+        }
+
+        return Ok();
+    }
 }

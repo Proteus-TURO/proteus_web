@@ -20,8 +20,8 @@ public class UserService
 
     public User? GetUser(string username)
     {
-        var user = (from u in _db.Users 
-            where u.Username.Equals(username) 
+        var user = (from u in _db.Users
+            where u.Username.Equals(username)
             select u).ToList();
 
         return user.Count == 0 ? null : user[0];
@@ -42,11 +42,12 @@ public class UserService
 
         return username == "" ? null : GetUser(username);
     }
-    
+
     public Role? GetRole(User user)
     {
         var role = (from r in _db.Roles
             join u in _db.Users on r.Id equals u.Id
+            where u.Id == user.Id
             select r).ToList();
 
         return role.Count == 0 ? null : role[0];
@@ -58,6 +59,17 @@ public class UserService
         return user != null && user.PasswordHash.Equals(passwordHash);
     }
 
+    public void SetLoginTime(string username)
+    {
+        var user = GetUser(username);
+        if (user != null)
+        {
+            user.LastLogin = DateTime.Now;
+        }
+
+        _db.SaveChanges();
+    }
+
     public bool HasRole(string username, int roleId)
     {
         var user = GetUser(username);
@@ -65,7 +77,7 @@ public class UserService
         {
             return false;
         }
-        
+
         var r = GetRole(user);
         return r != null && r.Id == roleId;
     }
@@ -74,28 +86,67 @@ public class UserService
     {
         return HasRole(username, 1);
     }
-    
+
     public bool IsEditor(string username)
     {
         return HasRole(username, 2) || IsAdministrator(username);
     }
 
-    public bool RegisterUser(User creator, string username, string passwordHash, string fullName, string title)
+    public bool RegisterUser(User creator, string username, string passwordHash, string? fullName, string? title,
+        string? role)
     {
         if (!IsAdministrator(creator.Username))
         {
             return false;
         }
 
+        if (string.IsNullOrEmpty(fullName))
+        {
+            fullName = username;
+        }
+
+        if (string.IsNullOrEmpty(title))
+        {
+            title = username;
+        }
+
+        if (string.IsNullOrEmpty(role))
+        {
+            role = "viewer";
+        }
+
+        var r = GetRole(role) ?? new Role()
+        {
+            Id = 3,
+            Name = "viewer"
+        };
+
         var newUser = new User
         {
             Username = username,
             PasswordHash = passwordHash,
             FullName = fullName,
-            Title = title
+            Title = title,
+            RoleId = r.Id
         };
 
         _db.Users.Add(newUser);
+        _db.SaveChanges();
+        return true;
+    }
+
+    public bool DeleteUser(User creator, string username)
+    {
+        if (!IsAdministrator(creator.Username))
+        {
+            return false;
+        }
+
+        var user = (from u in _db.Users
+            where u.Username == username
+            select u).First();
+
+        _db.Users.Remove(user);
         _db.SaveChanges();
         return true;
     }
@@ -165,7 +216,7 @@ public class UserService
         _db.SaveChanges();
         return true;
     }
-    
+
     public bool ChangeRoles(User creator, string username, string role)
     {
         if (!IsAdministrator(creator.Username))
@@ -176,7 +227,7 @@ public class UserService
         var user = GetUser(username);
         return user != null && AddRoleToUser(creator, username, role);
     }
-    
+
     public bool ChangeFullName(User creator, string username, string newName)
     {
         if (!IsAdministrator(creator.Username))
@@ -194,7 +245,7 @@ public class UserService
         _db.SaveChanges();
         return true;
     }
-    
+
     public bool ChangeTitle(User creator, string username, string? title)
     {
         if (!IsAdministrator(creator.Username))
@@ -211,6 +262,36 @@ public class UserService
         user.Title = title;
         _db.SaveChanges();
         return true;
+    }
+
+    public User? ChangeUser(User creator, User user, string? username, string? passwordHash, string? fullName,
+        string? title, string? role)
+    {
+        if (creator.Username != user.Username && !IsAdministrator(creator.Username))
+        {
+            return null;
+        }
+
+        var r = GetRole(user);
+
+        if (!string.IsNullOrEmpty(role) && r?.Name != role)
+        {
+            r = GetRole(role);
+        }
+        
+        if (r == null)
+        {
+            return null;
+        }
+
+        user.Username = username ?? user.Username;
+        user.PasswordHash = passwordHash ?? user.PasswordHash;
+        user.FullName = fullName ?? user.FullName;
+        user.Title = title ?? user.Title;
+        user.RoleId = r.Id;
+
+        _db.SaveChanges();
+        return user;
     }
 
     public bool ChangePassword(User creator, string username, string passwordHash)
@@ -230,5 +311,19 @@ public class UserService
         user.PasswordHash = passwordHash;
         _db.SaveChanges();
         return true;
+    }
+
+    public List<UserRole>? GetUsers(User creator)
+    {
+        if (!IsAdministrator(creator.Username))
+        {
+            return null;
+        }
+        
+        var users = (from u in _db.Users
+            join r in _db.Roles on u.Id equals r.Id
+            select new UserRole(u, r)).ToList();
+
+        return users;
     }
 }

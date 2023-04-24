@@ -57,4 +57,17 @@ public class ArticleService
     {
         return Enumerable.FirstOrDefault(_db.Articles, article => article.Topic == topic && article.Title == title);
     }
+
+    public bool DeleteArticle(string topic, string title)
+    {
+        var article = GetArticle(topic, title);
+        if (article == null)
+        {
+            return false;
+        }
+
+        _db.Articles.Remove(article);
+        _db.SaveChanges();
+        return true;
+    }
 }

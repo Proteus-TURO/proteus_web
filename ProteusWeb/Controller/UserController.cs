@@ -40,17 +40,42 @@ public class UserController : ControllerBase
         }
 
         // Neuer Benutzer wird vom currentUser angelegt
-        var result = _userService.RegisterUser(currentUser, mCreateUser.username, mCreateUser.passwordHash, mCreateUser.fullName, mCreateUser.title);
+        var result = _userService.RegisterUser(currentUser, mCreateUser.username, mCreateUser.passwordHash,
+            mCreateUser.fullName, mCreateUser.title, mCreateUser.role);
 
         return result ? Ok() : StatusCode(500);
     }
 
+    [Authorize(Roles = "administrator")]
+    [HttpDelete("DeleteUser")]
+    public async Task<ActionResult> DeleteUser([FromBody] MUsername mUsername)
+    {
+        if (_userService.GetUser(mUsername.username) == null)
+        {
+            return BadRequest("The username does not exist");
+        }
+
+        if (mUsername.username == "admin")
+        {
+            return BadRequest("admin is the only user that can not be deleted");
+        }
+
+        var currentUser = _userService.GetUser(HttpContext);
+
+        if (currentUser == null)
+        {
+            return StatusCode(500);
+        }
+
+        var result = _userService.DeleteUser(currentUser, mUsername.username);
+
+        return result ? Ok() : StatusCode(500);
+    }
 
     [Authorize]
-    [HttpPost("ChangeOwnPassword")]
-    public async Task<ActionResult> ChangeOwnPassword([FromBody] MPasswordHash mPasswordHash)
+    [HttpPost("OwnChanges")]
+    public async Task<ActionResult> OwnChanges([FromBody] MUser mUser)
     {
-        // Nur ein angemeldeter Benutzer kann sein eigenes Passwort �ndern
         var currentUser = _userService.GetUser(HttpContext);
 
         if (currentUser == null)
@@ -58,53 +83,72 @@ public class UserController : ControllerBase
             return BadRequest("You have to be logged in");
         }
 
-        if (string.IsNullOrEmpty(mPasswordHash.passwordHash))
+        if (!string.IsNullOrEmpty(mUser.username))
         {
-            return BadRequest("New password is required.");
+            var user = _userService.GetUser(mUser.username);
+            if (user != null)
+            {
+                return BadRequest("Username " + mUser.username + "already taken");
+            }
         }
 
-        var result = _userService.ChangePassword(currentUser, currentUser.Username, mPasswordHash.passwordHash);
+        if (!string.IsNullOrEmpty(mUser.role))
+        {
+            var role = _userService.GetRole(mUser.role);
+            if (role == null)
+            {
+                return BadRequest("Role " + mUser.role + " does not exist");
+            }
+        }
 
-        return result ? Ok() : StatusCode(500);
+        var result = _userService.ChangeUser(currentUser, currentUser, mUser.username, mUser.passwordHash,
+            mUser.fullName, mUser.title, mUser.role);
+
+        return result != null ? Ok() : StatusCode(500);
     }
 
     [Authorize(Roles = "administrator")]
-    [HttpPost("ChangeOtherPassword")]
-    public async Task<ActionResult> ChangeOtherPassword([FromBody] MCredentials mCredentials)
+    [HttpPost("OthersChanges")]
+    public async Task<ActionResult> OthersChanges([FromBody] MOtherUser mUser)
     {
         var currentUser = _userService.GetUser(HttpContext);
 
         if (currentUser == null)
         {
-            return Unauthorized();
+            return BadRequest("You have to be logged in");
         }
 
-        if (string.IsNullOrEmpty(mCredentials.passwordHash))
+        var otherUser = _userService.GetUser(mUser.username);
+        if (otherUser == null)
         {
-            return BadRequest("New password is required.");
+            return BadRequest("User with username " + otherUser.Username + " does not exist");
         }
 
-        var result = _userService.ChangePassword(currentUser, mCredentials.username, mCredentials.passwordHash);
-
-        return result ? Ok() : StatusCode(500);
-    }
-    
-    [Authorize(Roles = "administrator")]
-    [HttpPost("ChangeRole")]
-    public async Task<ActionResult> ChangeRole([FromBody] MRole mRole)
-    {
-        var currentUser = _userService.GetUser(HttpContext);
-
-        if (currentUser == null)
+        if (!string.IsNullOrEmpty(mUser.newUsername))
         {
-            return Unauthorized();
+            var user = _userService.GetUser(mUser.newUsername);
+            if (user != null)
+            {
+                return BadRequest("Username " + mUser.newUsername + " already taken");
+            }
         }
 
-        var result = _userService.ChangeRoles(currentUser, mRole.username, mRole.role);
+        if (!string.IsNullOrEmpty(mUser.role))
+        {
+            var role = _userService.GetRole(mUser.role);
+            if (role == null)
+            {
+                return BadRequest("Role " + mUser.role + " does not exist");
+            }
+        }
 
-        return result ? Ok() : StatusCode(500);
+        var result = _userService.ChangeUser(currentUser, otherUser, mUser.newUsername, mUser.passwordHash,
+            mUser.fullName, mUser.title, mUser.role);
+
+        return result != null ? Ok() : StatusCode(500);
     }
-    
+
+
     [Authorize]
     [HttpGet("GetUserInfo")]
     public async Task<ActionResult> GetUserInfo()
@@ -120,6 +164,7 @@ public class UserController : ControllerBase
 
         var ret = new Dictionary<string, object?>
         {
+            { "username", currentUser.Username },
             { "fullName", currentUser.FullName },
             { "title", currentUser.Title },
             { "role", role?.Name }
@@ -129,8 +174,8 @@ public class UserController : ControllerBase
     }
     
     [Authorize]
-    [HttpPost("ChangeOwnFullName")]
-    public async Task<ActionResult> ChangeOwnFullName([FromBody] MChangeFullName mChangeFullName)
+    [HttpGet("GetUserInfo/{username}")]
+    public async Task<ActionResult> GetUserInfo(string username)
     {
         var currentUser = _userService.GetUser(HttpContext);
 
@@ -139,14 +184,25 @@ public class UserController : ControllerBase
             return Unauthorized();
         }
 
-        var result = _userService.ChangeFullName(currentUser, currentUser.Username, mChangeFullName.newName);
+        var user = _userService.GetUser(username);
+        if (user == null)
+        {
+            return BadRequest("User with username " + username + " does not exist");
+        }
 
-        return result ? Ok() : StatusCode(500);
+        var ret = new Dictionary<string, string?>
+        {
+            { "username", user.Username },
+            { "fullName", user.FullName },
+            { "email", user.Email }
+        };
+
+        return Ok(ret);
     }
     
-    [Authorize]
-    [HttpPost("ChangeTitle")]
-    public async Task<ActionResult> ChangeTitle([FromBody] MChangeUserTitle mChangeUserTitle)
+    [Authorize(Roles = "administrator")]
+    [HttpGet("GetUsers")]
+    public async Task<ActionResult> GetUsers()
     {
         var currentUser = _userService.GetUser(HttpContext);
 
@@ -155,8 +211,12 @@ public class UserController : ControllerBase
             return Unauthorized();
         }
 
-        var result = _userService.ChangeTitle(currentUser, currentUser.Username, mChangeUserTitle.newTitle);
+        var users = _userService.GetUsers(currentUser);
+        if (users == null)
+        {
+            return Unauthorized();
+        }
 
-        return result ? Ok() : StatusCode(500);
+        return Ok(users);
     }
 }

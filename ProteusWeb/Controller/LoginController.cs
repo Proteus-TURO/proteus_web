@@ -35,7 +35,14 @@ public class LoginController : ControllerBase
         {
             new Claim(ClaimTypes.Name, mCredentials.username)
         };
-        var role = _userService.GetRole(mCredentials.username) ?? new Role
+        var user = _userService.GetUser(mCredentials.username);
+        if (user == null)
+        {
+            // User not in DB
+            return Unauthorized("username or password incorrect");
+        }
+        
+        var role = _userService.GetRole(user) ?? new Role
         {
             Id = 3,
             Name = "viewer"
@@ -72,8 +79,8 @@ public class LoginController : ControllerBase
             CookieAuthenticationDefaults.AuthenticationScheme);
 
         await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, authTicket.Principal, authTicket.Properties);
-
+        
+        _userService.SetLoginTime(mCredentials.username);
         return Ok(new { Token = new JwtSecurityTokenHandler().WriteToken(token) });
-
     }
 }
