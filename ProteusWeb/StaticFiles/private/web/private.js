@@ -131,7 +131,7 @@ async function logOut() {
                 "accept": "*/*"
             }
         });
-        window.location.href = "../login/"
+        window.location.href = "../../login/"
     } catch (e) {
         console.log(error)
     }
