@@ -9,7 +9,12 @@
             integrity="sha512-LhccdVNGe2QMEfI3x4DVV3ckMRe36TfydKss6mJpdHjNFiV07dFpS2xzeZedptKZrwxfICJpez09iNioiSZ3hA=="
             crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
+    <script src="https://cdn.jsdelivr.net/npm/easymde@2.18.0/dist/easymde.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/easymde@2.18.0/dist/easymde.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/highlight.js/latest/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/highlight.js/latest/styles/github.min.css">
     <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Private Space</title>
     <link rel="apple-touch-icon" sizes="180x180" href="/media/img/favicon/apple-touch-icon.png">
@@ -25,83 +30,72 @@
     </div>
     <ul class="nav-links">
         <li>
-            <a href="#">
+            <a href="/private/web/monitoring">
                 <i class='bx bx-grid-alt'></i>
-                <span class="link_name">Dashboard</span>
+                <span class="link_name">Monitoring</span>
             </a>
             <ul class="sub-menu blank">
-                <li><a class="link_name" href="#">Category</a></li>
+                <li><a class="link_name" href="/private/web/monitoring">Monitoring</a></li>
             </ul>
         </li>
         <li>
             <div class="iocn-link">
-                <a href="#">
+                <a href="/private/web/diary">
                     <i class='bx bx-history'></i>
                     <span class="link_name">Diary</span>
                 </a>
                 <i class='bx bxs-chevron-down arrow'></i>
             </div>
             <ul class="sub-menu">
-                <li><a class="link_name" href="#">Diary</a></li>
+                <li><a class="link_name" href="/private/web/diary">Diary</a></li>
                 <li>
                     <div class="menu-entries">
-                        <a href="#" id="newDiaryEntry" onclick="startEditor()">New +</a>
+                        <a href="/private/web/new/diary" id="newDiaryEntry">New +</a>
                     </div>
                 </li>
             </ul>
         </li>
         <li>
             <div class="iocn-link">
-                <a href="#">
+                <a href="/private/web/doc">
                     <i class='bx bx-book-alt'></i>
                     <span class="link_name">Doc</span>
                 </a>
                 <i class='bx bxs-chevron-down arrow'></i>
             </div>
             <ul class="sub-menu">
-                <li><a class="link_name" href="#">Doc</a></li>
+                <li><a class="link_name" href="/private/web/doc">Doc</a></li>
                 <li>
                     <div class="menu-entries">
-                        <a href="#" id="newDocEntry" onclick="startEditor()">New +</a>
+                        <a href="/private/web/new/doc" id="newDocEntry">New +</a>
                     </div>
                 </li>
             </ul>
         </li>
-        <li>
-            <a href="#">
-                <i class='bx bx-pie-chart-alt-2'></i>
-                <span class="link_name">Analytics</span>
-            </a>
-            <ul class="sub-menu blank">
-                <li><a class="link_name" href="#">Analytics</a></li>
-            </ul>
-        </li>
-        <li>
-            <a href="#">
+        <li id="people">
+            <a href="/private/web/people">
                 <i class='bx bx-group'></i>
                 <span class="link_name">People</span>
             </a>
             <ul class="sub-menu blank">
-                <li><a class="link_name" href="#">People</a></li>
+                <li><a class="link_name" href="/private/web/people">People</a></li>
             </ul>
         </li>
         <li>
-            <a href="#">
+            <a href="/private/web/settings">
                 <i class='bx bx-cog'></i>
                 <span class="link_name">Setting</span>
             </a>
             <ul class="sub-menu blank">
-                <li><a class="link_name" href="#">Settings</a></li>
+                <li><a class="link_name" href="/private/web/settings">Settings</a></li>
             </ul>
         </li>
         <li>
             <div class="profile-details">
-                <div class="profile-content">
-                    <!--<img src="image/profile.jpg" alt="profileImg">-->
-                </div>
+                <div></div>
                 <div class="name-job">
-                    <div id="user-name" class="profile_name">Hubi</div>
-                    <div id="user-title" class="job">Web Desginer</div>
+                    <div id="user-name" class="profile_name"></div>
+                    <div id="user-title" class="job"></div>
                 </div>
                 <div id="logoutbtn">
                     <i class='bx bx-log-out'></i>
@@ -122,6 +116,15 @@
     </div>
     <div class="title-container">
         <h1 id="titleDB"></h1>
+        <div id="title-editor">
+            <label>Title</label>
+            <br>
+            <input id="title-input" type="text">
+            <br>
+        </div>
+        <div class="flex-break"></div>
+        <button class="submit-button" onclick="sendNewArticle()">Submit</button>
+        <p id="error-message"></p>
         <div id="editor-button-container">
             <button class="edit-button"><i class="bx bx-edit"></i></button>
             <button class="delete-button"><i class="bx bx-trash-alt"></i></button>
@@ -129,7 +132,8 @@
     </div>
     <div id="content"></div>
 </section>
-<script src="/private/web/setup.js"></script>
-<script src="/private/web/private.js"></script>
+<script type="module" src="/private/web/setup.js"></script>
+<script type="module" src="/private/web/private.js"></script>
+<script type="module" src="/private/web/redirect.js"></script>
 </body>
 </html>

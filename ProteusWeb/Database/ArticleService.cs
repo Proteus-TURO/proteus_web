@@ -14,7 +14,7 @@ public class ArticleService
         _userService = userService;
     }
 
-    private bool ArticleAlreadyExist(string topic, string title)
+    public bool ArticleAlreadyExist(string topic, string title)
     {
         return Enumerable.Any(_db.Articles, article => article.Topic == topic && article.Title == title);
     }

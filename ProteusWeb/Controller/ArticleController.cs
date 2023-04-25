@@ -43,19 +43,24 @@ public class ArticleController : ControllerBase
             return Unauthorized("Only editors or admins can create an article");
         }
 
+        if (_articleService.ArticleAlreadyExist(topic, title))
+        {
+            return BadRequest("Article with topic " + topic + " and title " + title + " already exists");
+        }
+
         var result = _articleService.CreateArticle(topic, title, mContent.content, currentUser);
 
         return result ? Ok() : StatusCode(500);
     }
     
-    [HttpPost("{topic}/{title}/UploadFile")]
+    [HttpPost("/api/UploadFile")]
     [Authorize(Roles = "editor,administrator")]
-    public async Task<IActionResult> UploadFile(string topic, string title, IFormFile file)
+    public async Task<IActionResult> UploadFile(IFormFile file)
     {
         if (file.Length == 0)
             return BadRequest("Please select a file.");
 
-        var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "StaticFiles/private/files", topic, title);
+        var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "StaticFiles/private/files");
         var fileName = file.FileName;
         var filePath = Path.Combine(folderPath, fileName);
 
@@ -85,8 +90,7 @@ public class ArticleController : ControllerBase
             await file.CopyToAsync(stream);
         }
 
-        var r = HttpContext.Request;
-        var url = r.Scheme + "://" + r.Host + "/private/files/" + topic + "/" + title + "/" + fileName;
+        var url = "https://proteus-ev.tech/private/files/" + fileName;
 
         return Created(new Uri(url), "Successfully uploaded file");
     }

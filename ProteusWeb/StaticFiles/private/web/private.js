@@ -12,6 +12,134 @@ sidebarBtn.addEventListener("click", () => {
     sidebar.classList.toggle("close");
 });
 
+let easyMDE;
+
+function startMarkdownEditor(topic, title, content) {
+    const element = document.getElementById('content');
+    element.classList.add('markdown-editor');
+    let textArea = document.createElement('textarea');
+    element.appendChild(textArea);
+    easyMDE = new EasyMDE({
+        element: textArea,
+        toolbar: ['bold', 'italic', 'strikethrough', '|', 'heading-1', 'heading-2', 'heading-3', '|', 'quote', 'unordered-list', 'ordered-list', 'table', '|', 'code', 'link',
+            {
+                name: 'upload-image',
+                action: EasyMDE.drawUploadedImage,
+                title: 'Upload File',
+                className: 'fa fa-file-arrow-up'
+            }
+            , '|', 'preview', 'side-by-side', 'fullscreen', '|', 'undo', 'redo', 'guide'],
+        renderingConfig: {
+            codeSyntaxHighlighting: true
+        },
+        imageAccept: '*',
+        uploadImage: true,
+        imageUploadEndpoint: '/api/UploadFile',
+        imageUploadFunction: function (file, onSuccess, onError) {
+            let apiToken = localStorage.getItem("token");
+            let fd = new FormData();
+            fd.append('file', file);
+            fetch('/api/UploadFile', {
+                method: "POST",
+                headers: {
+                    "Authorization": "Bearer " + apiToken
+                },
+                body: fd
+            }).then(response => {
+                if (response.status === 201) {
+                    onSuccess(response.headers.get('location'));
+                } else {
+                    onError('Something went wrong');
+                }
+            });
+            /*setTimeout(function () {
+                onSuccess("https://picsum.photos/200/300");
+            }, 1000);*/
+        }
+    });
+    console.log(content);
+    easyMDE.value(content);
+
+    if (title) {
+        document.getElementById('titleDB').innerHTML = title;
+        document.getElementsByClassName("submit-button")[0].setAttribute("onClick", `sendArticle("${topic}", "${title}", true)`);
+        let markdownEditor = document.getElementsByClassName('markdown-editor')[0];
+        markdownEditor.style.height = '65%';
+        markdownEditor.style.marginTop = '20px';
+    }
+}
+
+async function sendNewArticle() {
+    const title = document.getElementById('title-input').value;
+    const path = window.location.pathname;
+    const pathArray = path.split("/");
+    let topic = pathArray[4];
+    await sendArticle(topic, title, false);
+}
+
+async function sendArticle(topic, title, isEdit) {
+    let spinner = document.getElementById('content-spinner');
+    spinner.style.display = 'flex';
+    let method = "POST";
+    if (isEdit) {
+        method = "PUT";
+    }
+    const content = easyMDE.value();
+    let apiToken = localStorage.getItem("token");
+    let response = await fetch(
+        `/api/Article/${encodeURIComponent(topic)}/${encodeURIComponent(title)}`, {
+            method: method,
+            headers: {
+                "Content-Type": "application/json",
+                "accept": "*/*",
+                "Authorization": "Bearer " + apiToken
+            },
+            body: JSON.stringify({
+                'content': content
+            })
+        }
+    );
+
+    console.log(response);
+
+    if (!response.ok) {
+        let errorMessage = document.getElementById('error-message');
+        errorMessage.style.display = 'block';
+        errorMessage.innerHTML = await response.text();
+    } else {
+        spinner = document.getElementById('content-spinner');
+        spinner.style.display = 'none';
+        document.location = `/private/web/${topic}/${title}`
+    }
+}
+
+async function deleteArticle(topic, title) {
+    let spinner = document.getElementById('content-spinner');
+    spinner.style.display = 'flex';
+    let apiToken = localStorage.getItem("token");
+    let response = await fetch(
+        `/api/Article/${encodeURIComponent(topic)}/${encodeURIComponent(title)}`, {
+            method: "DELETE",
+            headers: {
+                "accept": "*/*",
+                "Authorization": "Bearer " + apiToken
+            }
+        }
+    );
+
+    console.log(response);
+
+    if (!response.ok) {
+        let errorMessage = document.getElementById('error-message');
+        errorMessage.style.display = 'block';
+        errorMessage.innerHTML = await response.text();
+    } else {
+        spinner = document.getElementById('content-spinner');
+        spinner.style.display = 'none';
+        document.location = '/private/web/'
+    }
+}
+
 //document.getElementById('markdown').innerHTML = marked.parse('# Marked in the browser\n\nRendered by **marked**.');
 
 
@@ -27,14 +155,14 @@ function startEditor() {
       <div class="overDiv">
         <div class="text-editor-input">
           <label for="title-input">Titel:</label>
-          <input id="title-input" name="title-input"></input>
+          <input id="title-input" name="title-input">
         </div>
-        <div class="text-editor-input">
+        <div class="text-editor-input text-area-div">
           <label for="content-input">Content:</label>
           <textarea id="content-input" name="content-input"></textarea>
         </div>
+        <button type="submit" onClick="createContent()" id="post-button">Submit</button>
       </div>  
-      <button type="submit" onClick="createContent()" id="post-button">Erstellen</button>
     </form>
   `;
 

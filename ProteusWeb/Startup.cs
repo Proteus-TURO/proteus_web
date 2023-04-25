@@ -171,11 +171,14 @@ public class Startup
             EnableDefaultFiles = true,
             StaticFileOptions =
             {
+                ServeUnknownFileTypes = true,
+                DefaultContentType = "application/octet-stream",
                 OnPrepareResponse = ctx =>
                 {
                     ctx.Context.Response.Headers["Cache-Control"] = "no-cache, no-store";
                     ctx.Context.Response.Headers["Pragma"] = "no-cache";
                     ctx.Context.Response.Headers["Expires"] = "-1";
+                    ctx.Context.Response.Headers.Append("Access-Control-Allow-Origin", "*");
                 }
             }
         });

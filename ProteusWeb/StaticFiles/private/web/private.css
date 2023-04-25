@@ -213,14 +213,6 @@
     display: block;
 }
 
-.sidebar .nav-links li .sub-menu.blank {
-    opacity: 1;
-    pointer-events: auto;
-    padding: 3px 20px 6px 16px;
-    opacity: 0;
-    pointer-events: none;
-}
-
 .sidebar .nav-links li:hover .sub-menu.blank {
     top: 50%;
     transform: translateY(-50%);
@@ -232,7 +224,7 @@
     width: 260px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: right;
     background: #1d1b31;
     padding: 12px 0;
     transition: all 0.5s ease;
@@ -280,6 +272,10 @@
 
 .sidebar .profile-details .job {
     font-size: 12px;
+}
+
+.name-job {
+    margin-right: 100px;
 }
 
 .home-section {
@@ -387,6 +383,7 @@
     justify-content: center;
     align-items: flex-start;
     gap: 0.5rem;
+    width: 50%;
 }
 
 label {
@@ -403,10 +400,13 @@ input {
     border: 2px solid #ddd;
 }
 
+.text-area-div {
+    height: 100%;
+}
+
 textarea {
-    padding: 1rem;
-    height: 27rem;
-    width: 50rem;
+    height: 100%;
+    width: 100%;
     font-size: 1rem;
     border-radius: 0.25rem;
     border: 2px solid #ddd;
@@ -436,9 +436,10 @@ textarea:focus {
 
 .title-container {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    justify-content: left;
-    gap: 10px;
+    justify-content: center;
+    gap: 8px;
     margin-bottom: 30px;
 }
 
@@ -448,10 +449,11 @@ textarea:focus {
 }
 
 .edit-button,
-.delete-button {
+.delete-button,
+.submit-button {
     background-color: #2b6c7e;
     color: #fff;
-    padding: 2px 6px 1px 6px;
+    padding: 2px 6px 0px 6px;
     border-radius: 5px;
     border-color: transparent;
     font-size: 16px;
@@ -459,7 +461,8 @@ textarea:focus {
 }
 
 .edit-button:hover,
-.delete-button:hover {
+.delete-button:hover,
+.submit-button:hover {
     -webkit-transition: all 500ms ease;
     -moz-transition: all 500ms ease;
     -ms-transition: all 500ms ease;
@@ -470,7 +473,70 @@ textarea:focus {
     border-color: #2b6c7e;
 }
 
+.submit-button {
+    display: none;
+    text-align: center;
+}
+
 .bx-edit,
 .bx-trash-alt {
     font-size: 16px;
+}
+
+#title-editor {
+    text-align: center;
+    width: 100%;
+    display: none;
+}
+
+#title-editor input {
+    width: 50%;
+}
+
+.flex-break {
+    flex-basis: 100%;
+    width: 100%;
+    height: 0;
+}
+
+.markdown-editor {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    height: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 80px;
+}
+
+.EasyMDEContainer {
+    width: 100%;
+    height: 100%;
+    margin-bottom: 20px;
+}
+
+.editor-preview-side,
+.CodeMirror {
+    height: 100% !important;
+}
+
+#error-message {
+    display: none;
+    padding: 20px 0 5px 0;
+    color: rgb(200, 0, 0);
+    font-size: 16px;
+    margin-top: 10px;
+    animation: fade-in 0.5s ease-in-out;
+}
+
+@keyframes fade-in {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+
+#people {
+    display: none;
 }
