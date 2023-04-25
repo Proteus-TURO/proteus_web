@@ -20,7 +20,6 @@ public class User
     [Column("full_name")] public string FullName { get; set; } = "";
 
     [Column("title")] public string? Title { get; set; } = "";
-    [Column("email")] public string? Email { get; set; } = "";
     
     [Column("role_id")] 
     [ForeignKey("Role.id")]

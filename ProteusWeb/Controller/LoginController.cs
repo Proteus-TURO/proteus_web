@@ -1,6 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
@@ -33,7 +32,7 @@ public class LoginController : ControllerBase
         if (!isValidUser) return Unauthorized("username or password incorrect");
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.Name, mCredentials.username)
+            new(ClaimTypes.Name, mCredentials.username)
         };
         var user = _userService.GetUser(mCredentials.username);
         if (user == null)

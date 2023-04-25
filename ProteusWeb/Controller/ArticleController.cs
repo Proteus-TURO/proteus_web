@@ -1,15 +1,7 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 using ProteusWeb.Controller.Models;
 using ProteusWeb.Database;
-using ProteusWeb.Database.Tables;
-using ProteusWeb.Helper;
 
 namespace ProteusWeb.Controller;
 
@@ -19,43 +11,106 @@ public class ArticleController : ControllerBase
 {
     private readonly UserService _userService;
     private readonly ArticleService _articleService;
-    private readonly IConfiguration _configuration;
-    private const int MinutesUntilExpires = 24 * 60;
 
-    public ArticleController(UserService userService, ArticleService articleService, IConfiguration configuration)
+    public ArticleController(UserService userService, ArticleService articleService)
     {
         _userService = userService;
         _articleService = articleService;
-        _configuration = configuration;
+    }
+    
+    [HttpGet("{topic}/{title}")]
+    [Authorize]
+    public ActionResult GetContent(string topic, string title)
+    {
+        var article = _articleService.GetArticleGetResponse(topic, title);
+
+        if (article == null)
+        {
+            return BadRequest("Article not found");
+        }
+
+        return Ok(article);
     }
 
-    [HttpPost("New")]
-    [Authorize(Roles = "editor")]
-    public async Task<ActionResult> New([FromBody] MArticlePost mArticlePost)
+    [HttpPost("{topic}/{title}")]
+    [Authorize(Roles = "editor,administrator")]
+    public ActionResult New(string topic, string title, [FromBody] MContent mContent)
     {
         var currentUser = _userService.GetUser(HttpContext);
 
-        if (currentUser == null)
+        if (currentUser == null || !_userService.IsEditor(currentUser.Username))
         {
-            return Unauthorized();
+            return Unauthorized("Only editors or admins can create an article");
         }
 
-        var result = _articleService.CreateArticle(mArticlePost.topic, mArticlePost.title, mArticlePost.content, currentUser);
+        var result = _articleService.CreateArticle(topic, title, mContent.content, currentUser);
+
+        return result ? Ok() : StatusCode(500);
+    }
+    
+    [HttpPost("{topic}/{title}/UploadFile")]
+    [Authorize(Roles = "editor,administrator")]
+    public async Task<IActionResult> UploadFile(string topic, string title, IFormFile file)
+    {
+        if (file.Length == 0)
+            return BadRequest("Please select a file.");
+
+        var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "StaticFiles/private/files", topic, title);
+        var fileName = file.FileName;
+        var filePath = Path.Combine(folderPath, fileName);
+
+        if (System.IO.File.Exists(filePath))
+        {
+            var count = 1;
+            var fileNameOnly = Path.GetFileNameWithoutExtension(fileName);
+            var extension = Path.GetExtension(fileName);
+            fileName = $"{fileNameOnly}({count}){extension}";
+            filePath = Path.Combine(folderPath, fileName);
+
+            while (System.IO.File.Exists(filePath))
+            {
+                count++;
+                fileName = $"{fileNameOnly}({count}){extension}";
+                filePath = Path.Combine(folderPath, fileName);
+            }
+        }
+        
+        if (!Directory.Exists(folderPath))
+        {
+            Directory.CreateDirectory(folderPath);
+        }
+        
+        await using (var stream = new FileStream(filePath, FileMode.Create))
+        {
+            await file.CopyToAsync(stream);
+        }
+
+        var r = HttpContext.Request;
+        var url = r.Scheme + "://" + r.Host + "/private/files/" + topic + "/" + title + "/" + fileName;
+
+        return Created(new Uri(url), "Successfully uploaded file");
+    }
+    
+    [HttpPut("{topic}/{title}")]
+    [Authorize(Roles = "editor,administrator")]
+    public ActionResult Edit(string topic, string title, [FromBody] MContent mContent)
+    {
+        var currentUser = _userService.GetUser(HttpContext);
+
+        if (currentUser == null || !_userService.IsEditor(currentUser.Username))
+        {
+            return Unauthorized("Only editors or admins can edit an article");
+        }
+
+        var result = _articleService.EditArticle(topic, title, mContent.content, currentUser);
 
         return result ? Ok() : StatusCode(500);
     }
     
     [HttpGet("GetTitles")]
     [Authorize]
-    public async Task<ActionResult> GetTitles()
+    public ActionResult GetTitles()
     {
-        var currentUser = _userService.GetUser(HttpContext);
-
-        if (currentUser == null)
-        {
-            return Unauthorized();
-        }
-
         var articles = _articleService.GetAllArticles();
 
         var ret = new Dictionary<string, List<string>>();
@@ -72,25 +127,18 @@ public class ArticleController : ControllerBase
 
         return Ok(ret);
     }
-    
-    [HttpGet("GetContent")]
-    [Authorize]
-    public async Task<ActionResult> GetContent([FromQuery] MGetContent mGetContent)
-    {
-        var article = _articleService.GetArticle(mGetContent.topic, mGetContent.title);
 
-        if (article == null)
+    [HttpDelete("{topic}/{title}")]
+    [Authorize]
+    public ActionResult Delete([FromRoute] string topic, [FromRoute] string title)
+    {
+        var currentUser = _userService.GetUser(HttpContext);
+
+        if (currentUser == null || !_userService.IsEditor(currentUser.Username))
         {
-            return BadRequest("Article not found");
+            return Unauthorized("Only editors or admins can delete an article");
         }
-
-        return Ok(article.Content);
-    }
-    
-    [HttpDelete("Delete/{topic}/{title}")]
-    [Authorize]
-    public async Task<ActionResult> Delete([FromRoute] string topic, [FromRoute] string title)
-    {
+        
         var res = _articleService.DeleteArticle(topic, title);
 
         if (res == false)

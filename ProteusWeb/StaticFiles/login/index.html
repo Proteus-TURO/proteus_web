@@ -1,33 +1,41 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Login Screen</title>
-  <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css'>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/forge/0.10.0/forge.min.js"></script>
-  <link rel="stylesheet" href="./style.css">
+    <meta charset="UTF-8">
+    <title>Login Screen</title>
+    <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css'>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/forge/0.10.0/forge.min.js"></script>
+    <script src='https://code.jquery.com/jquery-1.11.1.min.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js'></script>
+    <link rel="stylesheet" href="/login/style.css">
+    <link rel="apple-touch-icon" sizes="180x180" href="/media/img/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/media/img/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/media/img/favicon/favicon-16x16.png">
+    <link rel="manifest" href="/media/img/favicon/site.webmanifest">
 </head>
 <body>
 <div id="spinner-container">
-	<div id="spinner"></div>
+    <div id="spinner"></div>
 </div>
 <!-- partial:index.partial.html -->
 <div class="container">
-	<div id="login-box">
-		<div class="logo">
-			<img src="proteusLogo.png" id="logoProteus"/>
-			<h1 class="logo-caption"><span class="tweak">L</span>ogin</h1>
-		</div><!-- /.logo -->
-		<div class="controls">
-			<input id="user-field" type="text" name="username" placeholder="Username" class="form-control" />
-			<input id="pass-field" type="password" name="username" placeholder="Password" class="form-control" />
-			<button onclick="login()" id="login-button" type="button" class="btn btn-default btn-block btn-custom">Login</button>
-		</div>
-	</div>
+    <div id="login-box">
+        <div class="logo">
+            <img src="proteusLogo.png" id="logoProteus" alt="Proteus Logo"/>
+            <h1 class="logo-caption"><span class="tweak">L</span>ogin</h1>
+        </div><!-- /.logo -->
+        <div class="controls">
+            <input id="user-field" type="text" name="username" placeholder="Username" class="form-control"/>
+            <input id="pass-field" type="password" name="username" placeholder="Password" class="form-control"/>
+            <button onclick="login()" id="login-button" type="button" class="btn btn-default btn-block btn-custom">
+                Login
+            </button>
+            <div id="error-message"></div>
+        </div>
+    </div>
 </div>
 <div id="particles-js"></div>
-<!-- partial -->
-<script src='https://code.jquery.com/jquery-1.11.1.min.js'></script>
-<script src="./login.js"></script>
+<script src="/login/login.js"></script>
+<script src="/login/background-animation.js"></script>
 </body>
 </html>

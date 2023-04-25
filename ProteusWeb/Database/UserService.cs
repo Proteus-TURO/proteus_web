@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using LinqToDB;
 using ProteusWeb.Database.Tables;
 
 namespace ProteusWeb.Database;
@@ -174,92 +173,6 @@ public class UserService
             Name = role
         };
         _db.Roles.Add(newRole);
-        _db.SaveChanges();
-        return true;
-    }
-
-    public bool AddRoleToUser(User creator, string username, string role)
-    {
-        if (!IsAdministrator(creator.Username))
-        {
-            return false;
-        }
-
-        var user = GetUser(username);
-        if (user == null)
-        {
-            return false;
-        }
-
-        if (GetRole(role) == null)
-        {
-            if (!CreateRole(creator, role))
-            {
-                return false;
-            }
-        }
-
-        var r = GetRole(role);
-        if (r == null)
-        {
-            return false;
-        }
-
-        var userHasRole = new UserHasRole
-        {
-            RoleId = r.Id,
-            UserId = user.Id
-        };
-
-        _db.UserHasRoles.Add(userHasRole);
-
-        _db.SaveChanges();
-        return true;
-    }
-
-    public bool ChangeRoles(User creator, string username, string role)
-    {
-        if (!IsAdministrator(creator.Username))
-        {
-            return false;
-        }
-
-        var user = GetUser(username);
-        return user != null && AddRoleToUser(creator, username, role);
-    }
-
-    public bool ChangeFullName(User creator, string username, string newName)
-    {
-        if (!IsAdministrator(creator.Username))
-        {
-            return false;
-        }
-
-        var user = GetUser(username);
-        if (user == null)
-        {
-            return false;
-        }
-
-        user.FullName = newName;
-        _db.SaveChanges();
-        return true;
-    }
-
-    public bool ChangeTitle(User creator, string username, string? title)
-    {
-        if (!IsAdministrator(creator.Username))
-        {
-            return false;
-        }
-
-        var user = GetUser(username);
-        if (user == null)
-        {
-            return false;
-        }
-
-        user.Title = title;
         _db.SaveChanges();
         return true;
     }

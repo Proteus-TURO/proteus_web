@@ -2,19 +2,18 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using ProteusWeb.Database;
-using Serilog;
+using ProteusWeb.Middleware;
 
 namespace ProteusWeb;
 
 public class Startup
 {
-    public static IConfiguration Configuration { get; set; }
+    private static IConfiguration Configuration { get; set; }
 
     public Startup(IConfiguration configuration)
     {
@@ -129,6 +128,8 @@ public class Startup
         app.UseCors(x => x.AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin());
         //---------------------------------------------------------------------------------
 
+        app.UseMiddleware<RedirectIfUnauthorizedMiddleware>();
+        
         app.Use(async (context, next) =>
         {
             if (context.Request.Path.StartsWithSegments("/private"))
@@ -137,6 +138,25 @@ public class Startup
                 {
                     context.Response.StatusCode = 401;
                     return;
+                }
+            }
+
+            await next();
+        });
+        
+        app.Use(async (context, next) =>
+        {
+            if (context.Request.Path.StartsWithSegments("/private/web"))
+            {
+                var fileExtension = context.Request.Path.ToString().LastIndexOf(".", StringComparison.Ordinal);
+                if (fileExtension != -1)
+                {
+                    var fileIdx = context.Request.Path.ToString().LastIndexOf("/", StringComparison.Ordinal) + 1;
+                    context.Request.Path = "/private/web/" + context.Request.Path.ToString()[fileIdx..];
+                }
+                else
+                {
+                    context.Request.Path = "/private/web/";
                 }
             }
 
@@ -158,13 +178,6 @@ public class Startup
                     ctx.Context.Response.Headers["Expires"] = "-1";
                 }
             }
-        });
-        
-        app.Use((context, next) =>
-        {
-            if (!context.Request.Path.StartsWithSegments("/private/web")) return next();
-            context.Response.Redirect("/private/web/", permanent: false);
-            return Task.CompletedTask;
         });
 
         

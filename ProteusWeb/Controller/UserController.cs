@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using ProteusWeb.Controller.Models;
 using ProteusWeb.Database;
@@ -10,12 +9,10 @@ namespace ProteusWeb.Controller;
 [Route("/api/[controller]")]
 public class UserController : ControllerBase
 {
-    private readonly DatabaseContext _context;
     private readonly UserService _userService;
 
-    public UserController(DatabaseContext context, UserService userService)
+    public UserController(UserService userService)
     {
-        _context = context;
         _userService = userService;
     }
 
@@ -23,7 +20,7 @@ public class UserController : ControllerBase
     //Hoffentlich passt des Killi <3
     [Authorize(Roles = "administrator")]
     [HttpPost("CreateUser")]
-    public async Task<ActionResult> CreateUser([FromBody] MCreateUser mCreateUser)
+    public ActionResult CreateUser([FromBody] MCreateUser mCreateUser)
     {
         // Gibts den Username schon?
         if (_userService.GetUser(mCreateUser.username) != null)
@@ -48,7 +45,7 @@ public class UserController : ControllerBase
 
     [Authorize(Roles = "administrator")]
     [HttpDelete("DeleteUser")]
-    public async Task<ActionResult> DeleteUser([FromBody] MUsername mUsername)
+    public ActionResult DeleteUser([FromBody] MUsername mUsername)
     {
         if (_userService.GetUser(mUsername.username) == null)
         {
@@ -74,7 +71,7 @@ public class UserController : ControllerBase
 
     [Authorize]
     [HttpPost("OwnChanges")]
-    public async Task<ActionResult> OwnChanges([FromBody] MUser mUser)
+    public ActionResult OwnChanges([FromBody] MUser mUser)
     {
         var currentUser = _userService.GetUser(HttpContext);
 
@@ -168,33 +165,6 @@ public class UserController : ControllerBase
             { "fullName", currentUser.FullName },
             { "title", currentUser.Title },
             { "role", role?.Name }
-        };
-
-        return Ok(ret);
-    }
-    
-    [Authorize]
-    [HttpGet("GetUserInfo/{username}")]
-    public async Task<ActionResult> GetUserInfo(string username)
-    {
-        var currentUser = _userService.GetUser(HttpContext);
-
-        if (currentUser == null)
-        {
-            return Unauthorized();
-        }
-
-        var user = _userService.GetUser(username);
-        if (user == null)
-        {
-            return BadRequest("User with username " + username + " does not exist");
-        }
-
-        var ret = new Dictionary<string, string?>
-        {
-            { "username", user.Username },
-            { "fullName", user.FullName },
-            { "email", user.Email }
         };
 
         return Ok(ret);

@@ -1,10 +1,5 @@
-using System.Security.Claims;
-using LinqToDB;
-using LinqToDB.DataProvider.MySql;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MySqlConnector;
 using ProteusWeb.Database;
 using ProteusWeb.Database.Tables;
 
@@ -15,11 +10,9 @@ namespace ProteusWeb.Controller;
 public class TestController : ControllerBase
 {
     private readonly UserService _userService;
-    private readonly ArticleService _articleService;
-    public TestController(UserService userService, ArticleService articleService)
+    public TestController(UserService userService)
     {
         _userService = userService;
-        _articleService = articleService;
     }
     
     [HttpGet]
@@ -30,14 +23,21 @@ public class TestController : ControllerBase
     
     [HttpPost("Authorization")]
     [Authorize]
-    public ActionResult Register()
+    public ActionResult Test()
     {
         var user = _userService.GetUser(HttpContext);
-        if (user != null)
+        if (user == null)
         {
-            return Ok("UserID: " + user.Id);
+            return StatusCode(500);
+        }
+        var role = _userService.GetRole(user);
+        if (role == null)
+        {
+            return StatusCode(500);
         }
 
-        return StatusCode(500);
+        var ret = new UserRole(user, role);
+
+        return Ok(ret);
     }
 }
