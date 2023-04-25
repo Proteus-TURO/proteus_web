@@ -1,22 +1,3 @@
-window.addEventListener('load', async function () {
-    const link = document.querySelector('.sub-menu li:first-child a');
-    const titles = await getTitles();
-    console.log(titles);
-
-    addNewLinks(titles);
-});
-
-window.onpopstate = function(event) {
-    if (event.state && event.state.opened) {
-        console.log(event.state.opened);
-    }
-};
-
-let fullName = document.getElementById("user-name");
-let title = document.getElementById("user-title");
-fullName.innerHTML = localStorage.getItem("fullName");
-title.innerHTML = localStorage.getItem("title");
-
 let arrow = document.querySelectorAll(".arrow");
 for (let i = 0; i < arrow.length; i++) {
     arrow[i].addEventListener("click", (e) => {
@@ -137,15 +118,6 @@ async function logOut() {
     }
 }
 
-async function getTitles() {
-    const response = await fetch("/api/Article/GetTitles");
-    const data = await response.json();
-
-    const titles = data.diary ? data.diary.join(', ') : '';
-
-    return titles;
-}
-
 function createContent() {
     const topic = "diary";
     const title = document.getElementById("title-input").value;
@@ -175,45 +147,4 @@ function createContent() {
 
 function deleteElement() {
 
-}
-
-async function addNewLinks(titles) {
-    const link = document.querySelector('.sub-menu li:nth-child(2) a');
-    const newLinkContainer = document.getElementById('newLink');
-
-    titles.split(', ').forEach(title => {
-        const newLink = link.cloneNode(true);
-        newLink.textContent = `${title}`;
-        newLink.setAttribute('href', '#');
-        newLink.setAttribute('onclick', `setInformation("${title}", " ${newLink}")`);
-
-        newLinkContainer.parentNode.insertBefore(newLink, newLinkContainer);
-    });
-}
-
-function setInformation(title, item) {
-    let element = document.getElementById("text-editor-form");
-    if (element) {
-        element.remove();
-    } else {
-        console.log("Gibt es nicht! " + element);
-    }
-
-    const tit = document.getElementById("titleDB");
-    tit.textContent = title;
-    tit.style.marginLeft = 4 + '%';
-
-    setContent(title);
-}
-
-async function setContent(title) {
-    const response = await fetch(`/api/Article/GetContent?topic=diary&title=${encodeURIComponent(title)}`);
-    const data = await response.text();
-
-    const info = document.getElementById("contentInfo");
-    info.textContent = data;
-    info.style.marginLeft = 4 + '%';
-
-    const btn = document.getElementById("delbtn");
-    btn.style.visibility = "visible";
 }

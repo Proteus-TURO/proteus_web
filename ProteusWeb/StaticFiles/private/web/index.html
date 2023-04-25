@@ -3,12 +3,10 @@
 <html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
-    <!--<title> Drop Down Sidebar Menu | CodingLab </title>-->
     <link rel="stylesheet" href="/private/web/private.css">
-    <!-- Boxiocns CDN Link -->
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.2.12/marked.min.js"
-            integrity="sha512-uwSxMaa/W7dmSIXEd07BMVymisMRRUS/Pr5a76AquekKKu9HWn4rBiCd+ZtwqnoijAJvttdrz8krzP26kZjg0Q=="
+    <link rel="stylesheet" href="/css/spinner.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"
+            integrity="sha512-LhccdVNGe2QMEfI3x4DVV3ckMRe36TfydKss6mJpdHjNFiV07dFpS2xzeZedptKZrwxfICJpez09iNioiSZ3hA=="
             crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
@@ -22,7 +20,7 @@
 <body>
 <div class="sidebar close">
     <div class="logo-details">
-        <img id="proteusLogo" src="/private/web/proteusIcon.png">
+        <img id="proteusLogo" src="/media/img/logo/Proteus.png" alt="Proteus Icon">
         <span class="logo_name">Proteus</span>
     </div>
     <ul class="nav-links">
@@ -45,7 +43,11 @@
             </div>
             <ul class="sub-menu">
                 <li><a class="link_name" href="#">Diary</a></li>
-                <li><a href="#" id="newLink" onclick="startEditor()">New +</a></li>
+                <li>
+                    <div class="menu-entries">
+                        <a href="#" id="newDiaryEntry" onclick="startEditor()">New +</a>
+                    </div>
+                </li>
             </ul>
         </li>
         <li>
@@ -58,9 +60,11 @@
             </div>
             <ul class="sub-menu">
                 <li><a class="link_name" href="#">Doc</a></li>
-                <li><a href="#">Web Design</a></li>
-                <li><a href="#">Login Form</a></li>
-                <li><a href="#">Card Design</a></li>
+                <li>
+                    <div class="menu-entries">
+                        <a href="#" id="newDocEntry" onclick="startEditor()">New +</a>
+                    </div>
+                </li>
             </ul>
         </li>
         <li>
@@ -112,10 +116,20 @@
     </div>
     <div id="forBorder">
     </div>
-    <h1 id="titleDB"></h1>
-    <button id="delbtn" onclick="deleteElement()">Delete</button>
-    <p id="contentInfo"></p>
+
+    <div id="content-spinner" class="spinner-container">
+        <div class="spinner"></div>
+    </div>
+    <div class="title-container">
+        <h1 id="titleDB"></h1>
+        <div id="editor-button-container">
+            <button class="edit-button"><i class="bx bx-edit"></i></button>
+            <button class="delete-button"><i class="bx bx-trash-alt"></i></button>
+        </div>
+    </div>
+    <div id="content"></div>
 </section>
+<script src="/private/web/setup.js"></script>
 <script src="/private/web/private.js"></script>
 </body>
 </html>

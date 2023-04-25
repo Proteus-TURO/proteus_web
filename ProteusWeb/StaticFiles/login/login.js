@@ -5,7 +5,7 @@ if (navigator.userAgentData.mobile) {
     console.log('mobile');
     document.getElementById('particles-js').style.display = 'none';
     let box = document.getElementById('login-box');
-    box.style.zoom = Math.min(window.innerWidth / box.offsetWidth, window.innerHeight / box.offsetHeight);
+    box.style.transform = 'scale(' + Math.min(window.innerWidth / box.offsetWidth, window.innerHeight / box.offsetHeight) + ')';
 }
 
 document.addEventListener("keydown", async function (event) {
@@ -36,7 +36,7 @@ async function login() {
     box.classList.remove('blur');
     let particles = document.getElementById('particles-js')
     particles.classList.remove('blur');
-    let spinner = document.getElementById('spinner-container');
+    let spinner = document.getElementsByClassName('spinner-container')[0];
     spinner.style.display = 'none';
 }
 
@@ -68,8 +68,6 @@ async function _getUserInfo() {
     });
 }
 
-
-//LOGIN SCRIPT
 function _login() {
     let error = document.getElementById('error-message');
     error.style.display = 'none';
@@ -77,7 +75,7 @@ function _login() {
     box.classList.add('blur');
     let particles = document.getElementById('particles-js')
     particles.classList.add('blur');
-    let spinner = document.getElementById('spinner-container');
+    let spinner = document.getElementsByClassName('spinner-container')[0];
     spinner.style.display = 'flex';
     let usernameString = document.getElementById('user-field').value;
     let passwordString = document.getElementById('pass-field').value;
