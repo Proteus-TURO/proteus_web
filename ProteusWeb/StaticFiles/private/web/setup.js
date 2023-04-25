@@ -7,9 +7,11 @@ let role = localStorage.getItem("role");
 if (role === 'administrator') {
     people.style.display = 'block';
 }
-const titles = await getTitles();
 
-await addNewLinks(titles);
+window.addEventListener('load', async function () {
+    const titles = await getTitles();
+    await addNewLinks(titles);
+});
 
 async function getTitles() {
     const response = await fetch("/api/Article/GetTitles");
