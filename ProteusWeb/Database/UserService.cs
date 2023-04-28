@@ -45,7 +45,7 @@ public class UserService
     public Role? GetRole(User user)
     {
         var role = (from r in _db.Roles
-            join u in _db.Users on r.Id equals u.Id
+            join u in _db.Users on r.Id equals u.RoleId
             where u.Id == user.Id
             select r).ToList();
 
