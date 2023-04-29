@@ -23,6 +23,7 @@
 
     <ItemGroup>
       <Folder Include="Properties\PublishProfiles" />
+      <Folder Include="StaticFiles\private\files" />
     </ItemGroup>
     
     <ItemGroup>
