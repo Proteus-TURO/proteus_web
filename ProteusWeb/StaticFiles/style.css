@@ -1,40 +1,40 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+html {
+    height: 100vh;
 }
 
 body {
-    font-family: sans-serif;
+    height: 8000vh;
+    background: #000;
 }
 
-.intro {
-    height: 100vh;
-}
-
-.intro video {
-    height: 100%;
-    width: 100%;
-    object-fit: cover;
-}
-
-.intro h1 {
-    position: absolute;
-    top: 50%;
+canvas {
+    position: fixed;
     left: 50%;
+    top: 50%;
     transform: translate(-50%, -50%);
-    font-size: 80px;
-    color: white;
-    background: black;
+    max-width: 100vw;
+    max-height: 100vh;
 }
 
-section {
-    height: 100vh;
-    color: black;
+footer {
+    position: fixed;
+    left: 50%;
+    bottom: 10px;
+    transform: translate(-50%, -50%);
+    max-width: 100vw;
+    max-height: 100vh;
+    opacity: 0;
+    transition: opacity 0.5s;
 }
 
-section h1 {
-    padding-top: 300px;
-    text-align: center;
-    font-size: 80px;
+footer a {
+    color: rgb(150, 150, 150);
+}
+
+.full-opacity {
+    opacity: 1;
+}
+
+footer a:hover {
+    color: rgb(200, 200, 200);
 }

@@ -1,53 +1,98 @@
-const intro = document.querySelector(".intro");
-const video = intro.querySelector("video");
-const text = intro.querySelector("h1");
-//END SECTION
-const section = document.querySelector("section");
-const end = section.querySelector("h1");
+const html = document.documentElement;
+const canvas = document.getElementById("canvas");
+const context = canvas.getContext("2d");
+const footer = document.querySelector("footer");
 
-//SCROLLMAGIC
-const controller = new ScrollMagic.Controller();
+canvas.width = 1920;
+canvas.height = 1080;
 
-//Scenes
-let scene = new ScrollMagic.Scene({
-    duration: 22000,
-    triggerElement: intro,
-    triggerHook: 0
-})
-    .setPin(intro)
-    .addTo(controller);
+const frameCount = 473;
+const currentFrame = index => (
+    `/media/animation/${index.toString().padStart(4, '0')}.jpg`
+);
 
-//Text Animation
-const textAnim = TweenMax.fromTo(text, 3, {opacity: 1}, {opacity: 0});
+const preloadImages = _ => {
+    setTimeout(_ => {
+        for (let i = 2; i < frameCount; i++) {
+            const img = new Image();
+            img.src = currentFrame(i);
+        }
+    }, 0);
+};
 
-let scene2 = new ScrollMagic.Scene({
-    duration: 3000,
-    triggerElement: intro,
-    triggerHook: 0
-})
-    .setTween(textAnim)
-    .addTo(controller);
+const img = new Image()
+img.src = currentFrame(1);
+img.onload = function () {
+    context.drawImage(img, 0, 0);
+}
 
-//Video Animation
-let accelamount = 0.1;
-let scrollpos = 0;
-let delay = 0;
+const updateImage = index => {
+    img.src = currentFrame(index);
+    context.drawImage(img, 0, 0);
+}
 
-scene.on("update", e => {
-    let pos = e.scrollPos / 1000;
-    scrollpos = pos;
-    /*if (pos < 4.257) {
-        scrollpos = pos;
-    } else if (pos < 5.031) {
-        scrollpos = 4.257;
-    } else {
-        scrollpos = pos - (5.031 - 4.257);
-    }*/
+const global_duration = 15;
+
+let pause = [
+    {name: 'Jetson Nano', frame: 102, duration: global_duration},
+    {name: 'MassDuino', frame: 132, duration: global_duration},
+    {name: 'Motor Driver', frame: 162, duration: global_duration},
+    {name: 'Mecanum Wheels', frame: 192, duration: global_duration},
+    {name: 'Realsense', frame: 222, duration: global_duration},
+    {name: 'DC Motor', frame: 252, duration: global_duration},
+    {name: 'Kilian', frame: 312, duration: global_duration},
+    {name: 'Manuel M', frame: 332, duration: global_duration},
+    {name: 'Manuel U', frame: 352, duration: global_duration},
+    {name: 'Marcel T', frame: 372, duration: global_duration},
+    {name: 'Maximilian', frame: 392, duration: global_duration},
+    {name: 'Marcel W', frame: 412, duration: global_duration},
+    {name: 'Group', frame: 432, duration: global_duration},
+    {name: 'Powered by', frame: 453, duration: global_duration},
+    {name: 'Sponsor', frame: 472, duration: global_duration},
+    {name: 'End', frame: 473, duration: 0},
+]
+
+let animationFrameCount = frameCount;
+pause.forEach(p => {
+    animationFrameCount += p.duration;
+    
 });
 
-setInterval(() => {
-    delay += (scrollpos - delay) * accelamount;
-    // console.log(scrollpos, delay);
+console.log(frameCount, animationFrameCount);
 
-    video.currentTime = scrollpos;
-}, 41.6);
+window.addEventListener('scroll', () => {
+    const scrollTop = html.scrollTop;
+    const maxScrollTop = html.scrollHeight - window.innerHeight;
+    const scrollFraction = scrollTop / maxScrollTop;
+    let animationFrameIndex = Math.ceil(animationFrameCount * scrollFraction);
+    let paused = 0;
+    for (let i = 0; i < pause.length; i++) {
+        const p = pause[i];
+        animationFrameIndex -= paused;
+        console.log(i, animationFrameIndex);
+        if (animationFrameIndex >= p.frame) {
+            if (animationFrameIndex < p.frame + p.duration) {
+                animationFrameIndex = p.frame;
+                break;
+            } else {
+                paused = p.duration;
+            }
+        } else {
+            break;
+        }
+    }
+    
+    const frameIndex = Math.min(
+        frameCount - 1,
+        animationFrameIndex
+    );
+    if (frameIndex > frameCount - 5) {
+        footer.classList.add('full-opacity');
+    } else {
+        footer.classList.remove('full-opacity');
+    }
+
+    requestAnimationFrame(() => updateImage(frameIndex + 1))
+});
+
+preloadImages()
