@@ -11,20 +11,25 @@ const currentFrame = index => (
     `/media/animation/${index.toString().padStart(4, '0')}.jpg`
 );
 
-const preloadImages = _ => {
+function preloadImages() {
     setTimeout(_ => {
+        if (!preloadImages.cache) {
+            preloadImages.cache = [];
+        }
         for (let i = 2; i < frameCount; i++) {
-            const img = new Image();
-            img.src = currentFrame(i);
+            const cacheImage = new Image();
+            cacheImage.src = currentFrame(i);
+            preloadImages.cache.push(cacheImage);
         }
     }, 0);
-};
-
-const img = new Image()
-img.src = currentFrame(1);
-img.onload = function () {
-    context.drawImage(img, 0, 0);
 }
+
+const img = new Image();
+img.onload = _ => {
+    context.drawImage(img, 0, 0);
+    preloadImages();
+};
+img.src = currentFrame(1);
 
 const updateImage = index => {
     img.src = currentFrame(index);
@@ -48,17 +53,14 @@ let pause = [
     {name: 'Marcel W', frame: 412, duration: global_duration},
     {name: 'Group', frame: 432, duration: global_duration},
     {name: 'Powered by', frame: 453, duration: global_duration},
-    {name: 'Sponsor', frame: 472, duration: global_duration},
     {name: 'End', frame: 473, duration: 0},
 ]
 
 let animationFrameCount = frameCount;
 pause.forEach(p => {
     animationFrameCount += p.duration;
-    
-});
 
-console.log(frameCount, animationFrameCount);
+});
 
 window.addEventListener('scroll', () => {
     const scrollTop = html.scrollTop;
@@ -69,7 +71,6 @@ window.addEventListener('scroll', () => {
     for (let i = 0; i < pause.length; i++) {
         const p = pause[i];
         animationFrameIndex -= paused;
-        console.log(i, animationFrameIndex);
         if (animationFrameIndex >= p.frame) {
             if (animationFrameIndex < p.frame + p.duration) {
                 animationFrameIndex = p.frame;
@@ -81,7 +82,7 @@ window.addEventListener('scroll', () => {
             break;
         }
     }
-    
+
     const frameIndex = Math.min(
         frameCount - 1,
         animationFrameIndex
@@ -94,5 +95,3 @@ window.addEventListener('scroll', () => {
 
     requestAnimationFrame(() => updateImage(frameIndex + 1))
 });
-
-preloadImages()

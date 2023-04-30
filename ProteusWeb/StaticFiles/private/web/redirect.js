@@ -3,10 +3,9 @@ const pathArray = path.split("/");
 console.log(pathArray);
 let markdownConverter = new showdown.Converter();
 if (pathArray.length > 2 && pathArray[3] !== '') {
-    let first = pathArray[3];
-    let second = pathArray[4] || null;
-    let third = pathArray[5] || null;
-    
+    let first = decodeURI(pathArray[3]);
+    let second = decodeURI(pathArray[4]) || null;
+    let third = decodeURI(pathArray[5]) || null;
     
     if (first === 'diary' || first === 'doc') {
         let titles = await getTitles();
@@ -17,6 +16,7 @@ if (pathArray.length > 2 && pathArray[3] !== '') {
             }
         }
         if (first in titles && titles[first].includes(second)) {
+            console.log(first, second);
             await setInformation(first, second);
         } else {
             // TODO Error
