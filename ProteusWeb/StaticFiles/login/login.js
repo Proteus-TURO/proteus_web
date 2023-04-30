@@ -1,7 +1,14 @@
 const LOGIN_API = "/api/Login";
 const USER_INFO_API = "/api/User/GetUserInfo";
 
-if (navigator.userAgentData.mobile) {
+function detectMobile() {
+    const toMatch = [/Android/i, /webOS/i, /iPhone/i, /iPad/i, /iPod/i, /BlackBerry/i, /Windows Phone/i];
+    return toMatch.some((toMatchItem) => {
+        return navigator.userAgent.match(toMatchItem);
+    });
+}
+
+if (detectMobile()) {
     console.log('mobile');
     document.getElementById('particles-js').style.display = 'none';
     let box = document.getElementById('login-box');
