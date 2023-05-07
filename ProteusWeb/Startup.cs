@@ -6,7 +6,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using ProteusWeb.Controller;
 using ProteusWeb.Database;
+using ProteusWeb.Helper;
 using ProteusWeb.Middleware;
 
 namespace ProteusWeb;
@@ -182,5 +184,7 @@ public class Startup
 
         
         app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+        HeloTuroReceiver.StartReceiving();
+        new Thread(CarController.StartSubscriptions).Start();
     }
 }

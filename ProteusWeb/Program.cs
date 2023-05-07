@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore;
+using ProteusWeb.Helper;
 using Serilog;
 
 namespace ProteusWeb;
@@ -14,7 +15,6 @@ public static class Program
 
         BuildWebHost().Run();
     }
-
     private static IWebHost BuildWebHost()
     {
         var config = new ConfigurationBuilder()
