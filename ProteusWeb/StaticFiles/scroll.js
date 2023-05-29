@@ -8,7 +8,7 @@ canvas.height = 1080;
 
 const frameCount = 473;
 const currentFrame = index => (
-    `/media/animation/${index.toString().padStart(4, '0')}.jpg`
+    `/media/animation/tree_D_four-0${index.toString().padStart(4, '0')}.jpg`
 );
 
 function preloadImages() {
